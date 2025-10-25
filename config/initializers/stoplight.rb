@@ -60,7 +60,7 @@ end
 # Set up Stoplight with SolidCache
 Stoplight.default_data_store = SolidCacheDataStore.new(Rails.cache)
 
-# Configure notifications to use Rails logger
+# Configure notifications to use Rails logger (Sentry integration handled separately)
 Stoplight.default_notifiers = [
   Stoplight::Notifier::Logger.new(Rails.logger)
 ]
