@@ -10,12 +10,92 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_25_222305) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_25_225622) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
 
+  create_table "business_ownerships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "business_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["business_id"], name: "index_business_ownerships_on_business_id"
+    t.index ["user_id", "business_id"], name: "index_business_ownerships_on_user_id_and_business_id", unique: true
+    t.index ["user_id"], name: "index_business_ownerships_on_user_id"
+  end
+
+  create_table "businesses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.integer "calls_included", null: false
+    t.integer "calls_used_this_period", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "plan", null: false
+    t.string "status", default: "active", null: false
+    t.string "stripe_customer_id", null: false
+    t.string "stripe_subscription_id"
+    t.datetime "updated_at", null: false
+    t.string "vapi_assistant_id"
+    t.index ["plan"], name: "index_businesses_on_plan"
+    t.index ["status"], name: "index_businesses_on_status"
+    t.index ["stripe_customer_id"], name: "index_businesses_on_stripe_customer_id", unique: true
+    t.index ["stripe_subscription_id"], name: "index_businesses_on_stripe_subscription_id"
+    t.index ["vapi_assistant_id"], name: "index_businesses_on_vapi_assistant_id"
+  end
+
+  create_table "calls", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "callable_id", null: false
+    t.string "callable_type", null: false
+    t.datetime "created_at", null: false
+    t.string "direction", null: false
+    t.integer "duration_seconds"
+    t.datetime "ended_at", precision: nil
+    t.jsonb "extracted_lead", default: {}
+    t.string "from_e164"
+    t.decimal "openai_cost", precision: 8, scale: 4
+    t.string "recording_url"
+    t.datetime "started_at", precision: nil
+    t.string "status", default: "initiated", null: false
+    t.string "to_e164", null: false
+    t.text "transcript"
+    t.string "twilio_call_sid"
+    t.decimal "twilio_cost", precision: 8, scale: 4
+    t.datetime "updated_at", null: false
+    t.string "vapi_call_id"
+    t.decimal "vapi_cost", precision: 8, scale: 4
+    t.index ["callable_type", "callable_id", "created_at"], name: "index_calls_on_callable_type_and_callable_id_and_created_at"
+    t.index ["callable_type", "callable_id"], name: "index_calls_on_callable"
+    t.index ["created_at"], name: "index_calls_on_created_at"
+    t.index ["direction"], name: "index_calls_on_direction"
+    t.index ["status"], name: "index_calls_on_status"
+    t.index ["twilio_call_sid"], name: "index_calls_on_twilio_call_sid", unique: true, where: "(twilio_call_sid IS NOT NULL)"
+    t.index ["vapi_call_id"], name: "index_calls_on_vapi_call_id", unique: true, where: "(vapi_call_id IS NOT NULL)"
+  end
+
+  create_table "trials", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.jsonb "assistant_config", default: {}
+    t.string "business_name", null: false
+    t.integer "calls_limit", default: 3, null: false
+    t.integer "calls_used", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", precision: nil, null: false
+    t.string "industry", null: false
+    t.string "phone_e164", null: false
+    t.string "scenario", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.string "vapi_assistant_id"
+    t.index ["expires_at"], name: "index_trials_on_expires_at"
+    t.index ["status"], name: "index_trials_on_status"
+    t.index ["user_id", "created_at"], name: "index_trials_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_trials_on_user_id"
+    t.index ["vapi_assistant_id"], name: "index_trials_on_vapi_assistant_id"
+    t.check_constraint "calls_used <= calls_limit", name: "chk_calls_within_limit"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "admin", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "current_sign_in_at"
     t.string "current_sign_in_ip"
@@ -24,6 +104,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_25_222305) do
     t.string "last_sign_in_ip"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.index ["admin"], name: "index_users_on_admin", where: "(admin = true)"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
+
+  add_foreign_key "business_ownerships", "businesses"
+  add_foreign_key "business_ownerships", "users"
+  add_foreign_key "trials", "users"
 end
