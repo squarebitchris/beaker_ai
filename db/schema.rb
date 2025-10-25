@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_25_225622) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_25_232129) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -106,6 +106,24 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_25_225622) do
     t.datetime "updated_at", null: false
     t.index ["admin"], name: "index_users_on_admin", where: "(admin = true)"
     t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  create_table "webhook_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "event_id", null: false
+    t.string "event_type", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.datetime "processed_at", precision: nil
+    t.string "provider", null: false
+    t.integer "retries", default: 0, null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_webhook_events_on_created_at"
+    t.index ["event_type"], name: "index_webhook_events_on_event_type"
+    t.index ["provider", "event_id"], name: "idx_unique_webhook_event", unique: true
+    t.index ["provider"], name: "index_webhook_events_on_provider"
+    t.index ["status"], name: "index_webhook_events_on_status"
   end
 
   add_foreign_key "business_ownerships", "businesses"

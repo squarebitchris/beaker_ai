@@ -12,4 +12,3 @@ module Devise
     end
   end
 end
-

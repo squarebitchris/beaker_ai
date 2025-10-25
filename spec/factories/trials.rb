@@ -9,17 +9,17 @@ FactoryBot.define do
     calls_used { 0 }
     calls_limit { 3 }
     expires_at { 48.hours.from_now }
-    
+
     trait :active do
       status { 'active' }
       vapi_assistant_id { "asst_#{SecureRandom.hex(12)}" }
     end
-    
+
     trait :expired do
       status { 'expired' }
       expires_at { 1.hour.ago }
     end
-    
+
     trait :with_calls do
       after(:create) do |trial|
         create_list(:call, 2, callable: trial)

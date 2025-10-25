@@ -6,12 +6,12 @@ FactoryBot.define do
     plan { 'starter' }
     status { 'active' }
     calls_included { 100 }  # Explicitly set this since callback might not run in tests
-    
+
     trait :pro_plan do
       plan { 'pro' }
       calls_included { 500 }
     end
-    
+
     trait :with_owner do
       after(:create) do |business|
         user = create(:user)

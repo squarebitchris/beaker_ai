@@ -1,78 +1,99 @@
 class VapiClient < ApiClientBase
-  BASE_URL = 'https://api.vapi.ai'
-  
+  BASE_URL = "https://api.vapi.ai"
+
   def initialize
-    @api_key = ENV.fetch('VAPI_API_KEY')
-    @http = HTTPX.with(
-      headers: {
-        'Authorization' => "Bearer #{@api_key}",
-        'Content-Type' => 'application/json'
-      }
-    )
+    @api_key = ENV.fetch("VAPI_API_KEY")
+    @base_url = BASE_URL
   end
-  
+
   def create_assistant(config:)
-    with_circuit_breaker(name: 'vapi:create_assistant') do
+    with_circuit_breaker(name: "vapi:create_assistant") do
       with_retry(attempts: 3) do
-        response = @http.post("#{BASE_URL}/assistant", json: config)
-        
-        raise ApiError, "Vapi API error: #{response.status}" unless (200..299).include?(response.status)
-        
+        response = make_request(:post, "/assistant", config)
+
+        raise ApiError, "Vapi API error: #{response.code}" unless (200..299).include?(response.code.to_i)
+
         JSON.parse(response.body)
       end
     end
   end
-  
+
   def start_call(assistant_id:, phone_number:)
-    with_circuit_breaker(name: 'vapi:start_call') do
+    with_circuit_breaker(name: "vapi:start_call") do
       with_retry(attempts: 3) do
         payload = {
           assistantId: assistant_id,
           phoneNumber: phone_number
         }
-        
-        response = @http.post("#{BASE_URL}/call", json: payload)
-        
-        raise ApiError, "Vapi API error: #{response.status}" unless (200..299).include?(response.status)
-        
+
+        response = make_request(:post, "/call", payload)
+
+        raise ApiError, "Vapi API error: #{response.code}" unless (200..299).include?(response.code.to_i)
+
         JSON.parse(response.body)
       end
     end
   end
-  
+
   def get_call(call_id:)
-    with_circuit_breaker(name: 'vapi:get_call', fallback: -> { nil }) do
+    with_circuit_breaker(name: "vapi:get_call", fallback: -> { nil }) do
       with_retry(attempts: 3) do
-        response = @http.get("#{BASE_URL}/call/#{call_id}")
-        
-        return nil unless (200..299).include?(response.status)
-        
+        response = make_request(:get, "/call/#{call_id}")
+
+        return nil unless (200..299).include?(response.code.to_i)
+
         JSON.parse(response.body)
       end
     end
   end
-  
+
   def update_assistant(assistant_id:, config:)
-    with_circuit_breaker(name: 'vapi:update_assistant') do
+    with_circuit_breaker(name: "vapi:update_assistant") do
       with_retry(attempts: 3) do
-        response = @http.patch("#{BASE_URL}/assistant/#{assistant_id}", json: config)
-        
-        raise ApiError, "Vapi API error: #{response.status}" unless (200..299).include?(response.status)
-        
+        response = make_request(:patch, "/assistant/#{assistant_id}", config)
+
+        raise ApiError, "Vapi API error: #{response.code}" unless (200..299).include?(response.code.to_i)
+
         JSON.parse(response.body)
       end
     end
   end
-  
+
   def delete_assistant(assistant_id:)
-    with_circuit_breaker(name: 'vapi:delete_assistant') do
+    with_circuit_breaker(name: "vapi:delete_assistant") do
       with_retry(attempts: 3) do
-        response = @http.delete("#{BASE_URL}/assistant/#{assistant_id}")
-        
-        raise ApiError, "Vapi API error: #{response.status}" unless (200..299).include?(response.status)
-        
+        response = make_request(:delete, "/assistant/#{assistant_id}")
+
+        raise ApiError, "Vapi API error: #{response.code}" unless (200..299).include?(response.code.to_i)
+
         true
       end
     end
+  end
+
+  private
+
+  def make_request(method, path, payload = nil)
+    uri = URI("#{@base_url}#{path}")
+
+    case method
+    when :get
+      request = Net::HTTP::Get.new(uri)
+    when :post
+      request = Net::HTTP::Post.new(uri)
+      request.body = payload.to_json if payload
+    when :patch
+      request = Net::HTTP::Patch.new(uri)
+      request.body = payload.to_json if payload
+    when :delete
+      request = Net::HTTP::Delete.new(uri)
+    end
+
+    request["Authorization"] = "Bearer #{@api_key}"
+    request["Content-Type"] = "application/json" if payload
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.request(request)
   end
 end

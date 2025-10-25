@@ -6,7 +6,7 @@ class CreateBusinessOwnerships < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    
-    add_index :business_ownerships, [:user_id, :business_id], unique: true
+
+    add_index :business_ownerships, [ :user_id, :business_id ], unique: true
   end
 end

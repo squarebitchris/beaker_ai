@@ -28,7 +28,7 @@ module BeakerAi
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
     end
-    
+
     # Use SolidQueue as the Active Job backend
     config.active_job.queue_adapter = :solid_queue
   end

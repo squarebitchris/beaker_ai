@@ -55,6 +55,14 @@ gem "stoplight", "~> 4.0"
 # HTTP client for API calls
 gem "httpx", "~> 1.6"
 
+# API SDKs for webhook verification
+gem "stripe", "~> 12.0"
+gem "twilio-ruby", "~> 7.0"
+
+# Error monitoring
+gem "sentry-ruby", "~> 5.18"
+gem "sentry-rails", "~> 5.18"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

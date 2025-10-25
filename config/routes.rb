@@ -1,20 +1,25 @@
 Rails.application.routes.draw do
   # Mount SolidQueue web UI (protect in Phase 4 with admin auth)
   mount MissionControl::Jobs::Engine, at: "/jobs"
-  
+
   devise_for :users, controllers: {
     sessions: "devise/passwordless/sessions"
   }
-  
+
   # Magic link authentication route
   devise_scope :user do
     get "/users/magic_link", to: "devise/passwordless/magic_links#show", as: :users_magic_link
   end
-  
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Custom health check with detailed status
   get "up" => "health#up", as: :health_check
+
+  # Webhook endpoints
+  post "/webhooks/stripe", to: "webhooks#create", defaults: { provider: "stripe" }
+  post "/webhooks/twilio", to: "webhooks#create", defaults: { provider: "twilio" }
+  post "/webhooks/vapi", to: "webhooks#create", defaults: { provider: "vapi" }
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

@@ -1,26 +1,24 @@
 class ApiClientBase
   class CircuitOpenError < StandardError; end
   class ApiError < StandardError; end
-  
+
   def with_circuit_breaker(name:, fallback: nil, &block)
     light = Stoplight(name)
       .with_threshold(5)      # Open after 5 failures
       .with_cool_off_time(60) # Try again after 60 seconds
-      .with_fallback do |error|
+
+    if fallback
+      light = light.with_fallback do |error|
         Rails.logger.error("[CircuitBreaker] #{name} is open: #{error.message}")
-        
-        if fallback
-          fallback.call
-        else
-          raise CircuitOpenError, "#{name} circuit breaker is open"
-        end
+        fallback.call
       end
-    
+    end
+
     light.run(&block)
   rescue Stoplight::Error::RedLight => e
     raise CircuitOpenError, "#{name} circuit breaker is open: #{e.message}"
   end
-  
+
   # Retry with exponential backoff for transient errors
   def with_retry(attempts: 3, base_delay: 1)
     attempt = 0
