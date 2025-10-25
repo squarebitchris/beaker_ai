@@ -41,7 +41,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R1-E01-T002** - Configure Devise + Passwordless gem for magic-link auth (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T002.md)
 - [x] **R1-E01-T003** - Set up SolidQueue for background jobs (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T003.md)
 - [x] **R1-E01-T004** - Create base models: User, Trial, Assistant, Call, Business (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T004.md)
-- [ ] **R1-E01-T005** - Implement CircuitBreaker wrapper for API clients (5 pts)
+- [x] **R1-E01-T005** - Implement CircuitBreaker wrapper for API clients (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T005.md)
 - [ ] **R1-E01-T006** - Build webhook receiver framework with signature verification (5 pts)
 - [ ] **R1-E01-T007** - Configure Sentry + Lograge for observability (2 pts)
 - [ ] **R1-E01-T008** - Set up RSpec + FactoryBot + test infrastructure (3 pts)
@@ -285,6 +285,15 @@ See `.env.example` for full list. Key variables:
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe keys
 - `SENDGRID_API_KEY` - Email delivery
 - `SENTRY_DSN` - Error tracking
+
+**Circuit Breaker API Clients:**
+- `VAPI_API_KEY` - Vapi.ai voice AI API
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` - Twilio telephony services
+- `STRIPE_SECRET_KEY` - Stripe payment processing
+- `TWILIO_STATUS_CALLBACK_URL`, `TWILIO_VOICE_URL` - Webhook endpoints
+- `STRIPE_SUCCESS_URL`, `STRIPE_CANCEL_URL` - Payment redirect URLs
+
+See [Environment Variables Documentation](./docs/environment-variables.md) for complete API client configuration.
 
 ## Key Metrics & Success Criteria
 
