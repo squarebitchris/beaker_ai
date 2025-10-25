@@ -8,7 +8,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 ## Tech Stack
 
-- **Backend:** Ruby on Rails 7.1, PostgreSQL (UUID), Redis, Sidekiq
+- **Backend:** Ruby on Rails 8.1, PostgreSQL (UUID), SolidQueue/SolidCache
 - **Frontend:** Turbo, Stimulus, Tailwind CSS, ViewComponents
 - **Voice AI:** Vapi.ai (OpenAI + ElevenLabs)
 - **Telephony:** Twilio
@@ -37,7 +37,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 **Epic E-001: Rails Foundation**
 
-- [ ] **R1-E01-T001** - Initialize Rails 7.1 app with PostgreSQL + Redis (2 pts)
+- [x] **R1-E01-T001** - Initialize Rails 8.1 app with PostgreSQL + UUID support (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T001.md)
 - [ ] **R1-E01-T002** - Configure Devise + Passwordless gem for magic-link auth (5 pts)
 - [ ] **R1-E01-T003** - Set up Sidekiq + Redis for background jobs (3 pts)
 - [ ] **R1-E01-T004** - Create base models: User, Trial, Assistant, Call, Business (5 pts)
@@ -51,9 +51,9 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [ ] **R1-E01-T012** - Create design system foundation (tokens, components) (3 pts)
 
 **Exit Criteria:**
-- Rails app boots locally with Postgres + Redis
+- Rails app boots locally with Postgres + SolidQueue
 - Magic-link auth working
-- Sidekiq processing jobs
+- SolidQueue processing jobs
 - CI pipeline green
 - Staging deployment successful
 
@@ -260,7 +260,7 @@ bin/dev
 bundle exec rspec
 
 # Check code quality
-bundle exec standardrb
+bundle exec rubocop
 ```
 
 ## Environment Variables Required
@@ -268,10 +268,9 @@ bundle exec standardrb
 See `.env.example` for full list. Key variables:
 
 - `DATABASE_URL` - PostgreSQL connection
-- `REDIS_URL` - Redis connection
 - `VAPI_API_KEY` - Vapi.ai API key
 - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` - Twilio credentials
-- `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe keys
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe keys
 - `SENDGRID_API_KEY` - Email delivery
 - `SENTRY_DSN` - Error tracking
 
