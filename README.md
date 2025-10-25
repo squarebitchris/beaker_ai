@@ -38,7 +38,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 **Epic E-001: Rails Foundation**
 
 - [x] **R1-E01-T001** - Initialize Rails 8.1 app with PostgreSQL + UUID support (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T001.md)
-- [ ] **R1-E01-T002** - Configure Devise + Passwordless gem for magic-link auth (5 pts)
+- [x] **R1-E01-T002** - Configure Devise + Passwordless gem for magic-link auth (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T002.md)
 - [ ] **R1-E01-T003** - Set up Sidekiq + Redis for background jobs (3 pts)
 - [ ] **R1-E01-T004** - Create base models: User, Trial, Assistant, Call, Business (5 pts)
 - [ ] **R1-E01-T005** - Implement CircuitBreaker wrapper for API clients (5 pts)
@@ -51,11 +51,11 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [ ] **R1-E01-T012** - Create design system foundation (tokens, components) (3 pts)
 
 **Exit Criteria:**
-- Rails app boots locally with Postgres + SolidQueue
-- Magic-link auth working
-- SolidQueue processing jobs
-- CI pipeline green
-- Staging deployment successful
+- ✅ Rails app boots locally with Postgres + SolidQueue
+- ✅ Magic-link auth working
+- [ ] SolidQueue processing jobs
+- [ ] CI pipeline green
+- [ ] Staging deployment successful
 
 ---
 
@@ -262,6 +262,18 @@ bundle exec rspec
 # Check code quality
 bundle exec rubocop
 ```
+
+### Testing Magic-Link Authentication
+
+The app uses passwordless magic-link authentication (no passwords required):
+
+1. Visit `http://localhost:3000/users/sign_in`
+2. Enter an email address
+3. Check magic link email at `http://localhost:3000/letter_opener` (in development)
+4. Click "Log in to my account" link
+5. You're now authenticated!
+
+**Note:** Magic links expire after 20 minutes for security.
 
 ## Environment Variables Required
 
