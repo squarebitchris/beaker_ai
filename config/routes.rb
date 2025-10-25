@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # Mount SolidQueue web UI (protect in Phase 4 with admin auth)
+  mount MissionControl::Jobs::Engine, at: "/jobs"
+  
   devise_for :users, controllers: {
     sessions: "devise/passwordless/sessions"
   }

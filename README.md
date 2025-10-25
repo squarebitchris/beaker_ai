@@ -39,7 +39,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 - [x] **R1-E01-T001** - Initialize Rails 8.1 app with PostgreSQL + UUID support (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T001.md)
 - [x] **R1-E01-T002** - Configure Devise + Passwordless gem for magic-link auth (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T002.md)
-- [ ] **R1-E01-T003** - Set up Sidekiq + Redis for background jobs (3 pts)
+- [x] **R1-E01-T003** - Set up SolidQueue for background jobs (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T003.md)
 - [ ] **R1-E01-T004** - Create base models: User, Trial, Assistant, Call, Business (5 pts)
 - [ ] **R1-E01-T005** - Implement CircuitBreaker wrapper for API clients (5 pts)
 - [ ] **R1-E01-T006** - Build webhook receiver framework with signature verification (5 pts)
