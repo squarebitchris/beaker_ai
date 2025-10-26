@@ -1,6 +1,10 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'simplecov'
-SimpleCov.start 'rails'
+unless ENV['COVERAGE'] == 'false'
+  SimpleCov.start 'rails' do
+    minimum_coverage 80
+  end
+end
 
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'

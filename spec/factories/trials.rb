@@ -20,6 +20,21 @@ FactoryBot.define do
       expires_at { 1.hour.ago }
     end
 
+    trait :pending do
+      status { 'pending' }
+      vapi_assistant_id { nil }
+    end
+
+    trait :with_assistant do
+      status { 'pending' }
+      vapi_assistant_id { "asst_#{SecureRandom.hex(12)}" }
+    end
+
+    trait :expired_pending do
+      status { 'pending' }
+      expires_at { 1.hour.ago }
+    end
+
     trait :with_calls do
       after(:create) do |trial|
         create_list(:call, 2, callable: trial)

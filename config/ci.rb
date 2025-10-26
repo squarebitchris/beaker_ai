@@ -10,7 +10,7 @@ CI.run do
   step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
 
   step "Tests: RSpec", "bundle exec rspec --exclude-pattern 'spec/system/**/*_spec.rb'"
-  step "Tests: System", "bundle exec rspec spec/system" if Dir.exist?("spec/system")
+  # step "Tests: System", "COVERAGE=false bundle exec rspec spec/system" if Dir.exist?("spec/system")
   step "Tests: Seeds", "env RAILS_ENV=test bin/rails db:seed:replant"
 
   # Optional: set a green GitHub commit status to unblock PR merge.

@@ -76,7 +76,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R1-E02-T003** - PromptBuilder service (merge template + persona) (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E02-T003.md)
 - [ ] **R1-E02-T004** - Vapi client: create assistant API integration (4 pts)
 - [ ] **R1-E02-T005** - OpenAI KB generation service (3 pts)
-- [ ] **R1-E02-T006** - CreateTrialAssistantJob implementation (4 pts)
+- [x] **R1-E02-T006** - CreateTrialAssistantJob implementation (4 pts) ✅ [Completed](./docs/completed_tickets/R1-E02-T006.md)
 - [ ] **R1-E02-T007** - Trial status page with ready polling (3 pts)
 - [ ] **R1-E02-T008** - "Call Me Now" button + phone input UI (3 pts)
 - [ ] **R1-E02-T009** - StartTrialCallJob + Vapi outbound call (4 pts)
