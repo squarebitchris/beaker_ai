@@ -370,48 +370,47 @@ end
 
 ---
 
-## TICKET: R1-E01-T003 - Set up SolidQueue for background jobs
+## TICKET: R1-E01-T003 - Set up Sidekiq for background jobs
 
 **Epic:** E-001: Rails Foundation & Infrastructure  
 **Points:** 3  
 **Priority:** P0  
 **Dependencies:** R1-E01-T001
 
-**⚠️ IMPLEMENTATION NOTE:** Originally planned to use Sidekiq + Redis, but Rails 8.1 includes SolidQueue by default. Using SolidQueue instead for simpler operations and no Redis dependency for jobs.
+**✅ COMPLETED:** Migrated from Rails 8.1's SolidQueue to Sidekiq for better production stability, mature ecosystem, and superior monitoring tools.
 
 ### Context & Why It Matters
-SolidQueue handles async work (API calls to Vapi, email sending, webhook processing). Using Rails 8.1's built-in SolidQueue instead of Sidekiq because it's database-backed (PostgreSQL), requires no Redis for jobs, has excellent monitoring via Mission Control, and is simpler to operate. Redis is still used for Rack::Attack rate limiting only.
+Sidekiq handles async work (API calls to Vapi, email sending, webhook processing). Uses Redis for job queuing and provides battle-tested reliability for production environments. Sidekiq Web UI at `/sidekiq` provides excellent monitoring and job management capabilities.
 
 ### Implementation Hints
-- **Gems (already included in Rails 8.1):**
+- **Gems:**
 ```ruby
-# Gemfile - SolidQueue comes with Rails 8.1
-gem 'mission_control-jobs', '~> 0.3'  # Monitoring UI
-# Note: redis gem still needed for Rack::Attack
+# Gemfile
+gem 'sidekiq', '~> 7.2'
+gem 'sidekiq-cron', '~> 1.12'  # For recurring jobs
 gem 'redis', '~> 5.1'
 ```
 
 - **Configuration files:**
 ```yaml
-# config/queue.yml
+# config/sidekiq.yml
+:concurrency: 5
+
+:queues:
+  - critical
+  - default
+  - low
+
 production:
-  workers:
-    - queues: "critical,default,low"
-      threads: 3
-      processes: <%= ENV.fetch("JOB_CONCURRENCY", 1) %>
-      polling_interval: 0.1
+  :concurrency: <%= ENV.fetch("JOB_CONCURRENCY", 10).to_i %>
 
 development:
-  workers:
-    - queues: "*"
-      threads: 3
-      processes: 1
-      polling_interval: 0.1
+  :concurrency: 3
 ```
 
 ```ruby
 # config/application.rb
-config.active_job.queue_adapter = :solid_queue
+config.active_job.queue_adapter = :sidekiq
 
 # app/jobs/application_job.rb
 class ApplicationJob < ActiveJob::Base
@@ -429,9 +428,13 @@ end
 - **Routes for monitoring UI:**
 ```ruby
 # config/routes.rb
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
-  # Protect with authentication later in Phase 4
-  mount MissionControl::Jobs::Engine, at: "/jobs"
+  # Protect with authentication (admin only)
+  authenticate :user, ->(user) { user.admin? } do
+    mount Sidekiq::Web => '/sidekiq'
+  end
 end
 ```
 
@@ -439,19 +442,19 @@ end
 ```yaml
 # Procfile.dev
 web: bin/rails server -p 3000
-worker: bin/rails solid_queue:start
+worker: bundle exec sidekiq -C config/sidekiq.yml
 css: bin/rails tailwindcss:watch
 js: yarn build --watch
 ```
 
 ### Detailed Acceptance Criteria
 
-**Scenario 1: SolidQueue Processes Jobs**
-**GIVEN** SolidQueue worker running
+**Scenario 1: Sidekiq Processes Jobs**
+**GIVEN** Sidekiq worker running
 **WHEN** enqueuing job via `MyJob.perform_later`
 **THEN** job processes within 5 seconds
 **AND** job completes successfully (no errors)
-**AND** job record in solid_queue_jobs table
+**AND** job visible in Sidekiq Web UI at `/sidekiq`
 
 **Scenario 2: Queue Prioritization Works**
 **GIVEN** jobs enqueued in critical, default, low queues
@@ -465,14 +468,15 @@ js: yarn build --watch
 **WHEN** job raises exception
 **THEN** job retries with exponential backoff
 **AND** max 3 retries attempted (configurable via retry_on)
-**AND** failed jobs visible in Mission Control
+**AND** failed jobs visible in Sidekiq Web UI
 
-**Scenario 4: Mission Control UI Accessible**
-**GIVEN** Rails server running
-**WHEN** visiting `/jobs`
-**THEN** Mission Control dashboard loads
-**AND** shows queue depths, processed count, failures
-**AND** can view job details and retry failed jobs
+**Scenario 4: Sidekiq Web UI Accessible**
+**GIVEN** Rails server running and admin user authenticated
+**WHEN** visiting `/sidekiq`
+**THEN** Sidekiq dashboard loads
+**AND** shows queue depths, processed count, failures, retries
+**AND** can view job details, retry failed jobs, and manage queues
+**AND** real-time job stats and graphs available
 
 ### TDD Approach
 
@@ -530,29 +534,29 @@ end
    - Check database: `SolidQueue::Job.count`
 
 ### Done Checklist
-- [x] SolidQueue processes jobs within 5 seconds of enqueue
+- [x] Sidekiq processes jobs within 5 seconds of enqueue
 - [x] Three queues configured: critical, default, low
 - [x] Priority queue processing working
-- [x] Mission Control UI accessible at `/jobs`
+- [x] Sidekiq Web UI accessible at `/sidekiq` (admin-protected)
 - [x] Retry logic working (configurable via retry_on)
-- [x] Failed jobs tracked in database
-- [x] Database connection stable (no connection pool issues)
+- [x] Failed jobs tracked in Redis
+- [x] Redis connection stable and configured
 - [x] `Procfile.dev` configured for `bin/dev` command
 - [x] Job specs template created in `spec/support/job_helpers.rb`
 
 ### Gotchas & Pitfalls
-- **Database connection pool:** SolidQueue uses database connections from pool, ensure adequate pool size
-- **Job arguments:** Must be JSON-serializable (no ActiveRecord objects directly) - same as Sidekiq
+- **Redis connection:** Sidekiq requires Redis for job queuing, ensure REDIS_URL is set
+- **Job arguments:** Must be JSON-serializable (no ActiveRecord objects directly)
 - **Worker processes:** Can scale horizontally by increasing JOB_CONCURRENCY env var
-- **Failed job retention:** Failed jobs persist in database, configure cleanup policy
-- **Mission Control security:** MUST add authentication before deploying (Phase 4 admin panel)
-- **No Redis needed for jobs:** Redis only required for Rack::Attack rate limiting (DB 2)
+- **Failed job retention:** Configure dead job retention in sidekiq.yml
+- **Sidekiq Web security:** MUST add authentication before deploying (uses admin user check)
+- **SSL certificates:** Heroku Redis uses self-signed certs, configure SSL params with VERIFY_NONE
 
 ### References
-- start.md: Section 9.1 (Phase 0 ticket T0.02) - **Note: Updated from original Sidekiq plan**
+- start.md: Section 9.1 (Phase 0 ticket T0.02) - **Note: Migrated to Sidekiq for production stability**
 - BUILD-GUIDE.md: Pattern 3 (Job retry pattern)
-- SolidQueue docs: https://github.com/rails/solid_queue
-- Mission Control Jobs: https://github.com/rails/mission_control-jobs
+- Sidekiq docs: https://github.com/sidekiq/sidekiq
+- Sidekiq-Cron docs: https://github.com/sidekiq-cron/sidekiq-cron
 
 ---
 
