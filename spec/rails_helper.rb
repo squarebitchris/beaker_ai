@@ -48,10 +48,10 @@ RSpec.configure do |config|
   config.before(:each) do
     Sidekiq::Worker.clear_all
   end
-  
+
   # Use fake mode by default for all tests
   Sidekiq::Testing.fake!
-  
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')

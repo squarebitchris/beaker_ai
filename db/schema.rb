@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_26_050824) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_055728) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -53,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_050824) do
     t.datetime "ended_at", precision: nil
     t.jsonb "extracted_lead", default: {}
     t.string "from_e164"
+    t.string "intent"
     t.decimal "openai_cost", precision: 8, scale: 4
     t.string "recording_url"
     t.datetime "started_at", precision: nil
@@ -68,6 +69,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_050824) do
     t.index ["callable_type", "callable_id"], name: "index_calls_on_callable"
     t.index ["created_at"], name: "index_calls_on_created_at"
     t.index ["direction"], name: "index_calls_on_direction"
+    t.index ["intent"], name: "index_calls_on_intent"
     t.index ["status"], name: "index_calls_on_status"
     t.index ["twilio_call_sid"], name: "index_calls_on_twilio_call_sid", unique: true, where: "(twilio_call_sid IS NOT NULL)"
     t.index ["vapi_call_id"], name: "index_calls_on_vapi_call_id", unique: true, where: "(vapi_call_id IS NOT NULL)"

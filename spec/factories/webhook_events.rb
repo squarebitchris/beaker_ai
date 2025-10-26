@@ -24,7 +24,21 @@ FactoryBot.define do
       provider { 'vapi' }
       event_id { "call_#{SecureRandom.hex(16)}" }
       event_type { 'call.ended' }
-      payload { { message: { id: event_id, type: event_type } } }
+      payload do
+        {
+          type: event_type,
+          call: {
+            id: event_id,
+            status: 'ended',
+            duration: 120,
+            recordingUrl: 'https://example.com/recording.mp3',
+            transcript: 'Agent: Hello, how can I help you?'
+          },
+          assistant: {
+            id: "asst_#{SecureRandom.hex(12)}"
+          }
+        }
+      end
     end
 
     trait :processing do

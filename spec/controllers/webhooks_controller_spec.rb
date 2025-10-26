@@ -156,10 +156,16 @@ RSpec.describe 'Webhooks', type: :request do
   describe 'POST /webhooks/vapi' do
     let(:vapi_payload) do
       {
-        message: {
+        type: 'call.ended',
+        call: {
           id: 'call_123456',
-          type: 'call.ended',
-          data: { duration: 120 }
+          status: 'ended',
+          duration: 120,
+          recordingUrl: 'https://example.com/recording.mp3',
+          transcript: 'Agent: Hello, how can I help you?'
+        },
+        assistant: {
+          id: 'asst_123'
         }
       }.to_json
     end
@@ -209,6 +215,29 @@ RSpec.describe 'Webhooks', type: :request do
         }.not_to change(WebhookEvent, :count)
 
         expect(response).to have_http_status(:bad_request)
+      end
+    end
+
+    context 'with duplicate event' do
+      before do
+        create(:webhook_event, provider: 'vapi', event_id: 'call_123456')
+      end
+
+      it 'returns 200 but does not enqueue duplicate job' do
+        signature = OpenSSL::HMAC.hexdigest('SHA256', vapi_secret, vapi_payload)
+        allow_any_instance_of(WebhooksController).to receive(:verify_vapi_signature)
+
+        expect {
+          post '/webhooks/vapi',
+               params: vapi_payload,
+               headers: {
+                 'Content-Type' => 'application/json',
+                 'x-vapi-signature' => signature
+               }
+        }.not_to change(WebhookEvent, :count)
+
+        expect(ActiveJob::Base.queue_adapter.enqueued_jobs.count).to eq(0)
+        expect(response).to have_http_status(:ok)
       end
     end
   end

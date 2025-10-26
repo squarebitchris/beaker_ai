@@ -3,6 +3,7 @@ class Call < ApplicationRecord
 
   enum :direction, { inbound: "inbound", outbound_trial: "outbound_trial", outbound_lead: "outbound_lead" }
   enum :status, { initiated: "initiated", ringing: "ringing", in_progress: "in_progress", completed: "completed", failed: "failed" }
+  enum :intent, { lead_intake: "lead_intake", scheduling: "scheduling", info: "info", other: "other" }, prefix: true
 
   validates :to_e164, presence: true
   validates :vapi_call_id, uniqueness: true, allow_nil: true

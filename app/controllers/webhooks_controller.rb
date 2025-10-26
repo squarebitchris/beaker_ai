@@ -95,7 +95,8 @@ class WebhooksController < ApplicationController
     when "twilio"
       params["CallSid"] || params["MessageSid"]
     when "vapi"
-      parsed_body.dig("message", "id")
+      # Vapi webhook structure: { "call": { "id": "call_123" } }
+      parsed_body.dig("call", "id")
     end
   end
 
@@ -106,7 +107,8 @@ class WebhooksController < ApplicationController
     when "twilio"
       params["CallStatus"] ? "call_status" : "message_status"
     when "vapi"
-      parsed_body.dig("message", "type")
+      # Vapi webhook structure: { "type": "call.ended" }
+      parsed_body["type"]
     end
   end
 

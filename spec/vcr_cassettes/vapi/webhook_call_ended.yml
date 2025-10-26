@@ -1,0 +1,53 @@
+http_interactions:
+- request:
+    method: post
+    uri: https://api.vapi.ai/webhook
+    body:
+      encoding: UTF-8
+      string: |
+        {
+          "type": "call.ended",
+          "call": {
+            "id": "call_123456789",
+            "status": "ended",
+            "duration": 120,
+            "recordingUrl": "https://storage.vapi.ai/recordings/call_123456789.mp3",
+            "transcript": "Agent: Hello, this is Sarah from Smith HVAC. How can I help you today?\nCustomer: Hi, I need a quote for a new air conditioning unit.\nAgent: I'd be happy to help with that. Can I get your name and phone number?\nCustomer: Sure, it's John Smith, 555-123-4567.\nAgent: Perfect, John. I'll have someone contact you within the hour to schedule a visit.",
+            "cost": 0.15,
+            "startedAt": "2025-01-26T10:30:00Z",
+            "endedAt": "2025-01-26T10:32:00Z"
+          },
+          "assistant": {
+            "id": "asst_abc123def456",
+            "name": "Sarah - HVAC Assistant"
+          },
+          "functionCalls": [
+            {
+              "name": "capture_lead",
+              "parameters": {
+                "name": "John Smith",
+                "phone": "555-123-4567",
+                "email": "",
+                "intent": "quote_request",
+                "notes": "Needs quote for new AC unit"
+              }
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+      x-vapi-signature:
+      - a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"status":"received"}'
+    http_version: 
+  recorded_at: Sun, 26 Jan 2025 10:32:00 GMT

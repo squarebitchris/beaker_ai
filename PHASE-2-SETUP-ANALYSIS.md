@@ -136,6 +136,12 @@ The existing `calls` table may need additional fields:
 3. Parse Vapi payload structure
 4. Create/update Call records from webhook
 
+**Key Events to Process:**
+- `call-started` → Create Call record with `status: "initiated"`
+- `call-ended` → Update Call with duration, recording, transcript
+- `speech-update` → Update transcript in real-time
+- `function-call` → Extract lead data from function calls
+
 **Files to create:**
 - `app/services/webhooks/vapi/call_processor.rb`
 - `app/jobs/process_vapi_event_job.rb` (or update existing)
@@ -241,7 +247,15 @@ def webhook_event_id
   end
 ```
 
-**Verify:** This matches actual Vapi webhook format
+**Issue:** This doesn't match Vapi's actual webhook format. Based on [Vapi documentation](https://docs.vapi.ai/server-url), the correct structure is:
+```ruby
+def webhook_event_id
+  when "vapi"
+    parsed_body.dig("call", "id")  # Use call.id, not message.id
+  end
+```
+
+**Fix needed:** Update WebhooksController to use `call.id` for Vapi webhooks.
 
 ### 3. Call Model Fields
 Check if these fields exist:
@@ -299,12 +313,13 @@ Create: `spec/system/mini_report_spec.rb`
 - [ ] Test webhook endpoint accessible
 
 ### Testing Vapi Webhooks Locally
-**Using ngrok or similar:**
+
+#### Method 1: Direct ngrok (Simple)
 ```bash
 # Install ngrok
 brew install ngrok
 
-# Start ngrok tunnel
+# Start ngrok tunnel to your Rails app
 ngrok http 3000
 
 # Get URL and configure in Vapi dashboard
@@ -312,6 +327,49 @@ ngrok http 3000
 # Webhook URL: https://xxxx.ngrok.io/webhooks/vapi
 # Secret: <set in .env as VAPI_WEBHOOK_SECRET>
 ```
+
+#### Method 2: Vapi CLI + ngrok (Advanced)
+```bash
+# Terminal 1: Start ngrok tunnel to Vapi CLI listener
+ngrok http 4242
+
+# Terminal 2: Start Vapi webhook forwarder
+vapi listen --forward-to localhost:3000/webhooks/vapi
+
+# Configure Vapi dashboard webhook URL to: https://xxxx.ngrok.io
+# This forwards: Vapi → ngrok → vapi listen → your Rails app
+```
+
+#### Vapi Webhook Events
+Based on [Vapi documentation](https://docs.vapi.ai/server-url), your webhook will receive:
+
+**Call Lifecycle Events:**
+- `call-started` - Call initiated
+- `call-ended` - Call completed with summary data
+- `speech-update` - Real-time transcript updates
+- `function-call` - When assistant calls tools/functions
+- `assistant-request` - Dynamic configuration requests
+- `hang-notification` - When assistant fails to reply
+
+**Key Event Structure:**
+```json
+{
+  "type": "call-ended",
+  "call": {
+    "id": "call_abc123",
+    "duration": 120,
+    "recordingUrl": "https://...",
+    "transcript": "...",
+    "functionCalls": [...]
+  }
+}
+```
+
+#### Webhook Security
+- **Signature Verification**: Vapi sends `x-vapi-signature` header
+- **HMAC-SHA256**: Verify with your `VAPI_WEBHOOK_SECRET`
+- **Idempotency**: Use `call.id` as unique identifier
+- **Response Time**: Keep responses under 10 seconds
 
 ### Production (Heroku)
 - [ ] Vapi webhook URL configured
