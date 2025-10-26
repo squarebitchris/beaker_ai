@@ -24,14 +24,91 @@ RSpec.describe "Onboarding", type: :request do
   end
 
   describe "GET /onboarding/status" do
-    # No auth needed for status endpoint
+    let(:checkout_session_id) { "cs_test_123" }
+    let(:subscription_id) { "sub_test_456" }
 
-    it "returns pending status (Phase 3 placeholder)" do
-      get onboarding_status_path(session_id: "cs_test_123")
+    context "when business is ready" do
+      let!(:business) { create(:business, stripe_subscription_id: subscription_id, plan: "starter") }
 
-      expect(response).to have_http_status(:success)
-      json = JSON.parse(response.body)
-      expect(json["status"]).to eq("pending")
+      before do
+        allow_any_instance_of(StripeClient).to receive(:get_checkout_session).and_return(
+          double(subscription: subscription_id)
+        )
+      end
+
+      it "returns ready status with redirect URL" do
+        get onboarding_status_path(session_id: checkout_session_id)
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json["status"]).to eq("ready")
+        expect(json["redirect_url"]).to be_present
+        expect(json["business_id"]).to eq(business.id)
+      end
+    end
+
+    context "when business is pending" do
+      before do
+        allow_any_instance_of(StripeClient).to receive(:get_checkout_session).and_return(
+          double(subscription: subscription_id)
+        )
+        # Business not created yet (job still processing)
+      end
+
+      it "returns pending status" do
+        get onboarding_status_path(session_id: checkout_session_id)
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json["status"]).to eq("pending")
+        expect(json["message"]).to eq("Setting up your account...")
+      end
+    end
+
+    context "when checkout session not found" do
+      before do
+        allow_any_instance_of(StripeClient).to receive(:get_checkout_session).and_return(nil)
+      end
+
+      it "returns failed status" do
+        get onboarding_status_path(session_id: checkout_session_id)
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json["status"]).to eq("failed")
+        expect(json["message"]).to include("not found")
+      end
+    end
+
+    context "when subscription not yet created" do
+      before do
+        allow_any_instance_of(StripeClient).to receive(:get_checkout_session).and_return(
+          double(subscription: nil)
+        )
+      end
+
+      it "returns pending status waiting for subscription" do
+        get onboarding_status_path(session_id: checkout_session_id)
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json["status"]).to eq("pending")
+        expect(json["message"]).to eq("Waiting for subscription to be created...")
+      end
+    end
+
+    context "when StripeClient raises error" do
+      before do
+        allow_any_instance_of(StripeClient).to receive(:get_checkout_session).and_raise(StandardError, "API error")
+      end
+
+      it "returns failed status" do
+        get onboarding_status_path(session_id: checkout_session_id)
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json["status"]).to eq("failed")
+      end
     end
   end
 

@@ -66,6 +66,17 @@ class StripeClient < ApiClientBase
     raise ApiError, "Stripe API error: #{e.message}"
   end
 
+  def get_checkout_session(session_id:)
+    with_circuit_breaker(name: "stripe:get_checkout_session") do
+      Stripe::Checkout::Session.retrieve(session_id)
+    end
+  rescue Stripe::InvalidRequestError => e
+    Rails.logger.warn("[Stripe] Checkout session not found: #{session_id}")
+    nil
+  rescue Stripe::StripeError => e
+    raise ApiError, "Stripe API error: #{e.message}"
+  end
+
   def get_payment_intent(payment_intent_id:)
     with_circuit_breaker(name: "stripe:get_payment_intent", fallback: -> { nil }) do
       Stripe::PaymentIntent.retrieve(payment_intent_id)

@@ -304,6 +304,52 @@ RSpec.describe StripeClient, vcr: false do
     end
   end
 
+  describe '#get_checkout_session' do
+    let(:session_id) { 'cs_test_123' }
+
+    context 'when session exists' do
+      it 'retrieves the session' do
+        session = double('Stripe::Checkout::Session',
+          id: session_id,
+          subscription: 'sub_test_456',
+          customer: 'cus_test_789'
+        )
+
+        allow(Stripe::Checkout::Session).to receive(:retrieve)
+          .with(session_id)
+          .and_return(session)
+
+        result = client.get_checkout_session(session_id: session_id)
+
+        expect(result.id).to eq(session_id)
+        expect(result.subscription).to eq('sub_test_456')
+        expect(result.customer).to eq('cus_test_789')
+      end
+    end
+
+    context 'when session does not exist' do
+      it 'returns nil' do
+        allow(Stripe::Checkout::Session).to receive(:retrieve)
+          .and_raise(Stripe::InvalidRequestError.new('No such checkout session', 'session_id'))
+
+        session = client.get_checkout_session(session_id: 'cs_nonexistent')
+
+        expect(session).to be_nil
+      end
+    end
+
+    context 'when API raises other Stripe error' do
+      it 'raises ApiError' do
+        allow(Stripe::Checkout::Session).to receive(:retrieve)
+          .and_raise(Stripe::APIConnectionError.new('Connection error'))
+
+        expect {
+          client.get_checkout_session(session_id: session_id)
+        }.to raise_error(ApiClientBase::ApiError, /Stripe API error/)
+      end
+    end
+  end
+
   describe 'initialization' do
     it 'sets up Stripe API key' do
       described_class.new

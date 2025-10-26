@@ -20,11 +20,51 @@ class OnboardingController < ApplicationController
   def status
     session_id = params.require(:session_id)
 
-    # Check if business was created for this checkout session
-    # For now, return pending
+    # Retrieve checkout session from Stripe to get subscription_id
+    checkout_session = StripeClient.new.get_checkout_session(session_id: session_id)
+
+    unless checkout_session
+      render json: {
+        status: "failed",
+        message: "Checkout session not found. Please contact support."
+      } and return
+    end
+
+    subscription_id = checkout_session.subscription
+
+    unless subscription_id
+      render json: {
+        status: "pending",
+        message: "Waiting for subscription to be created..."
+      } and return
+    end
+
+    # Check if business was created (ConvertTrialToBusinessJob completed)
+    business = Business.find_by(stripe_subscription_id: subscription_id)
+
+    if business
+      # Business is ready! Redirect to business dashboard
+      render json: {
+        status: "ready",
+        redirect_url: root_path, # Phase 4 will change to business dashboard
+        business_id: business.id,
+        message: "Your account is ready!"
+      }
+    else
+      # Still waiting for ConvertTrialToBusinessJob to complete
+      render json: {
+        status: "pending",
+        message: "Setting up your account..."
+      }
+    end
+
+  rescue => e
+    Rails.logger.error("[Onboarding] Status check failed: #{e.message}")
+    Sentry.capture_exception(e, extra: { session_id: session_id })
+
     render json: {
-      status: "pending",
-      message: "Setting up your account..."
+      status: "failed",
+      message: "Unable to check status. Please contact support."
     }
   end
 end
