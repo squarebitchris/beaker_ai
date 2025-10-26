@@ -1,0 +1,16 @@
+:concurrency: 5
+
+:queues:
+  - critical
+  - default
+  - low
+
+production:
+  :concurrency: <%= ENV.fetch("JOB_CONCURRENCY", 10).to_i %>
+
+development:
+  :concurrency: 3
+
+test:
+  :concurrency: 1
+

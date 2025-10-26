@@ -15,6 +15,10 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 require 'rspec/rails'
 require "view_component/test_helpers"
 require "capybara/rspec"
+
+# Configure Sidekiq for testing
+require 'sidekiq/testing'
+
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -40,6 +44,14 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+  # Configure Sidekiq to use fake mode (jobs are queued but not executed)
+  config.before(:each) do
+    Sidekiq::Worker.clear_all
+  end
+  
+  # Use fake mode by default for all tests
+  Sidekiq::Testing.fake!
+  
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')

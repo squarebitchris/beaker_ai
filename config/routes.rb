@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
-  # Mount SolidQueue web UI (protect in Phase 4 with admin auth)
-  mount MissionControl::Jobs::Engine, at: "/jobs"
+  # Mount Sidekiq web UI (protected with admin authentication)
+  require 'sidekiq/web'
+  authenticate :user, ->(user) { user.admin? } do
+    mount Sidekiq::Web => '/sidekiq'
+  end
 
   devise_for :users, controllers: {
     sessions: "devise/passwordless/sessions"

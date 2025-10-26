@@ -16,7 +16,9 @@ class HealthController < ApplicationController
   end
 
   def queue_ok?
-    # Check SolidQueue is configured (tables will be created by queue migrations)
-    defined?(SolidQueue) ? true : false
+    # Check Sidekiq is configured and Redis is reachable
+    Sidekiq.redis(&:ping) == "PONG"
+  rescue
+    false
   end
 end

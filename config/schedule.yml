@@ -1,0 +1,12 @@
+production:
+  trial_reaper:
+    cron: "0 3 * * *"  # 3am daily
+    class: TrialReaperJob
+    queue: default
+
+development:
+  trial_reaper:
+    cron: "*/30 * * * *"  # every 30 minutes
+    class: TrialReaperJob
+    queue: default
+

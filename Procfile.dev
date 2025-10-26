@@ -1,4 +1,4 @@
 web: env RUBY_DEBUG_OPEN=true bin/rails server
-worker: bin/rails solid_queue:start
+worker: bundle exec sidekiq -C config/sidekiq.yml
 js: yarn build --watch
 css: yarn build:css --watch

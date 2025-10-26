@@ -29,13 +29,13 @@ gem "devise-passwordless", "~> 0.2"
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
-# Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
+# Use the database-backed adapters for Rails.cache and Action Cable
 gem "solid_cache"
-gem "solid_queue"
 gem "solid_cable"
 
-# Background jobs monitoring
-gem "mission_control-jobs"
+# Background job processing with Sidekiq
+gem "sidekiq", "~> 7.2"
+gem "sidekiq-cron", "~> 1.12"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
