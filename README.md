@@ -169,7 +169,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R2-E05-T003** - Admin: Entity search (Business/User/Lead) (3 pts) ✅ [Completed](./docs/completed_tickets/R2-E05-T003.md)
 - [x] **R2-E05-T004** - Twilio client setup + number provisioning (4 pts) ✅ [Completed](./docs/completed_tickets/R2-E05-T004.md)
 - [x] **R2-E05-T005** - AssignTwilioNumberJob (4 pts) ✅ [Completed](./docs/completed_tickets/R2-E05-T005.md)
-- [ ] **R2-E05-T006** - Call model for paid calls (3 pts)
+- [x] **R2-E05-T006** - Call model for paid calls (3 pts) ✅ [Completed](./docs/completed_tickets/R2-E05-T006.md)
 - [ ] **R2-E05-T007** - Paid webhook processing (ProcessVapiEventJob extension) (4 pts)
 - [x] **R2-E05-T008** - BusinessChannel for real-time updates (3 pts) ✅ Completed as part of R2-E05-T005
 - [ ] **R2-E05-T009** - Dashboard UI: number display, KPI tiles, calls list (5 pts)

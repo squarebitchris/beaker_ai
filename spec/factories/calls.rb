@@ -54,5 +54,11 @@ FactoryBot.define do
         }
       end
     end
+
+    trait :with_lead do
+      # Association will be defined when Lead model exists in Phase 5
+      # For now, lead_id can be set to a UUID string for testing
+      lead_id { SecureRandom.uuid }
+    end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_26_213937) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_215629) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -58,6 +58,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_213937) do
     t.jsonb "extracted_lead", default: {}
     t.string "from_e164"
     t.string "intent"
+    t.uuid "lead_id"
     t.decimal "openai_cost", precision: 8, scale: 4
     t.string "recording_url"
     t.string "scenario_slug"
@@ -76,6 +77,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_213937) do
     t.index ["created_at"], name: "index_calls_on_created_at"
     t.index ["direction"], name: "index_calls_on_direction"
     t.index ["intent"], name: "index_calls_on_intent"
+    t.index ["lead_id"], name: "index_calls_on_lead_id"
     t.index ["scenario_slug"], name: "index_calls_on_scenario_slug"
     t.index ["status"], name: "index_calls_on_status"
     t.index ["twilio_call_sid"], name: "index_calls_on_twilio_call_sid", unique: true, where: "(twilio_call_sid IS NOT NULL)"

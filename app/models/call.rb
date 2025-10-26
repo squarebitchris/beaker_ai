@@ -1,5 +1,6 @@
 class Call < ApplicationRecord
   belongs_to :callable, polymorphic: true
+  # belongs_to :lead, optional: true  # Uncomment in Phase 5 when Lead model exists
 
   enum :direction, { inbound: "inbound", outbound_trial: "outbound_trial", outbound_lead: "outbound_lead" }
   enum :status, { initiated: "initiated", ringing: "ringing", in_progress: "in_progress", completed: "completed", failed: "failed" }

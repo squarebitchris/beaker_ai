@@ -17,6 +17,21 @@ RSpec.describe Call, type: :model do
     end
   end
 
+  describe 'lead association' do
+    it 'accepts lead_id without requiring Lead model' do
+      call = build(:call, lead_id: nil)
+      expect(call.lead_id).to be_nil
+      expect(call).to be_valid
+    end
+
+    it 'accepts lead_id with a UUID string' do
+      lead_uuid = SecureRandom.uuid
+      call = build(:call, lead_id: lead_uuid)
+      expect(call.lead_id).to eq(lead_uuid)
+      expect(call).to be_valid
+    end
+  end
+
   describe 'validations' do
     subject { build(:call) }
 
