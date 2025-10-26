@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_26_055728) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_064023) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -47,6 +47,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_055728) do
   create_table "calls", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "callable_id", null: false
     t.string "callable_type", null: false
+    t.jsonb "captured", default: {}, null: false
     t.datetime "created_at", null: false
     t.string "direction", null: false
     t.integer "duration_seconds"
@@ -56,6 +57,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_055728) do
     t.string "intent"
     t.decimal "openai_cost", precision: 8, scale: 4
     t.string "recording_url"
+    t.string "scenario_slug"
     t.datetime "started_at", precision: nil
     t.string "status", default: "initiated", null: false
     t.string "to_e164", null: false
@@ -67,9 +69,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_055728) do
     t.decimal "vapi_cost", precision: 8, scale: 4
     t.index ["callable_type", "callable_id", "created_at"], name: "index_calls_on_callable_type_and_callable_id_and_created_at"
     t.index ["callable_type", "callable_id"], name: "index_calls_on_callable"
+    t.index ["captured"], name: "index_calls_on_captured", using: :gin
     t.index ["created_at"], name: "index_calls_on_created_at"
     t.index ["direction"], name: "index_calls_on_direction"
     t.index ["intent"], name: "index_calls_on_intent"
+    t.index ["scenario_slug"], name: "index_calls_on_scenario_slug"
     t.index ["status"], name: "index_calls_on_status"
     t.index ["twilio_call_sid"], name: "index_calls_on_twilio_call_sid", unique: true, where: "(twilio_call_sid IS NOT NULL)"
     t.index ["vapi_call_id"], name: "index_calls_on_vapi_call_id", unique: true, where: "(vapi_call_id IS NOT NULL)"

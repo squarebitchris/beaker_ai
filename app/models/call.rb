@@ -13,6 +13,11 @@ class Call < ApplicationRecord
   scope :today, -> { where("created_at >= ?", Time.current.beginning_of_day) }
   scope :for_business, ->(business_id) { where(callable_type: "Business", callable_id: business_id) }
 
+  # Phase 2 scopes
+  scope :with_captured_leads, -> { where.not("captured = '{}'::jsonb") }
+  scope :by_scenario, ->(slug) { where(scenario_slug: slug) }
+  scope :for_trial, ->(trial_id) { where(callable_type: "Trial", callable_id: trial_id) }
+
   def total_cost
     (vapi_cost || 0) + (twilio_cost || 0) + (openai_cost || 0)
   end
@@ -20,5 +25,26 @@ class Call < ApplicationRecord
   def duration_minutes
     return nil unless duration_seconds
     (duration_seconds / 60.0).round(1)
+  end
+
+  # Phase 2 helper methods for captured data
+  def captured_name
+    captured.dig("name")
+  end
+
+  def captured_phone
+    captured.dig("phone")
+  end
+
+  def captured_email
+    captured.dig("email")
+  end
+
+  def captured_goal
+    captured.dig("goal") || captured.dig("intent")
+  end
+
+  def has_captured_data?
+    captured.present? && captured.any?
   end
 end

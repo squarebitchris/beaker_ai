@@ -24,5 +24,35 @@ FactoryBot.define do
       association :callable, factory: :business
       direction { 'inbound' }
     end
+
+    trait :with_captured_lead do
+      captured do
+        {
+          name: Faker::Name.name,
+          phone: "+1#{Faker::Number.number(digits: 10)}",
+          email: Faker::Internet.email,
+          goal: 'Request quote'
+        }
+      end
+    end
+
+    trait :lead_intake_scenario do
+      scenario_slug { 'lead_intake' }
+      intent { 'lead_intake' }
+      with_captured_lead
+    end
+
+    trait :scheduling_scenario do
+      scenario_slug { 'scheduling' }
+      intent { 'scheduling' }
+      captured do
+        {
+          name: Faker::Name.name,
+          phone: "+1#{Faker::Number.number(digits: 10)}",
+          preferred_date: '2025-11-15',
+          preferred_time: '2:00 PM'
+        }
+      end
+    end
   end
 end

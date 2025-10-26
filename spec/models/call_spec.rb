@@ -92,4 +92,77 @@ RSpec.describe Call, type: :model do
       expect(Call.for_business(business.id)).not_to include(completed_call)
     end
   end
+
+  describe 'Phase 2 scopes' do
+    describe '.with_captured_leads' do
+      it 'returns calls with captured data' do
+        call_with_data = create(:call, :with_captured_lead)
+        call_without_data = create(:call, captured: {})
+
+        expect(Call.with_captured_leads).to include(call_with_data)
+        expect(Call.with_captured_leads).not_to include(call_without_data)
+      end
+    end
+
+    describe '.by_scenario' do
+      it 'filters calls by scenario_slug' do
+        lead_call = create(:call, :lead_intake_scenario)
+        schedule_call = create(:call, :scheduling_scenario)
+
+        expect(Call.by_scenario('lead_intake')).to include(lead_call)
+        expect(Call.by_scenario('lead_intake')).not_to include(schedule_call)
+      end
+    end
+
+    describe '.for_trial' do
+      it 'returns only calls for specified trial' do
+        trial1 = create(:trial)
+        trial2 = create(:trial)
+        call1 = create(:call, callable: trial1)
+        call2 = create(:call, callable: trial2)
+
+        expect(Call.for_trial(trial1.id)).to include(call1)
+        expect(Call.for_trial(trial1.id)).not_to include(call2)
+      end
+    end
+  end
+
+  describe 'captured data helpers' do
+    let(:call) { build(:call, :with_captured_lead) }
+
+    describe '#captured_name' do
+      it 'returns captured name' do
+        expect(call.captured_name).to be_present
+      end
+    end
+
+    describe '#captured_phone' do
+      it 'returns captured phone' do
+        expect(call.captured_phone).to match(/^\+1\d{10}$/)
+      end
+    end
+
+    describe '#captured_email' do
+      it 'returns captured email' do
+        expect(call.captured_email).to include('@')
+      end
+    end
+
+    describe '#captured_goal' do
+      it 'returns captured goal' do
+        expect(call.captured_goal).to eq('Request quote')
+      end
+    end
+
+    describe '#has_captured_data?' do
+      it 'returns true when captured has data' do
+        expect(call.has_captured_data?).to be true
+      end
+
+      it 'returns false when captured is empty' do
+        call.captured = {}
+        expect(call.has_captured_data?).to be false
+      end
+    end
+  end
 end

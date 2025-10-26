@@ -49,6 +49,19 @@ class Trial < ApplicationRecord
     vapi_assistant_id.present? && status == "active"
   end
 
+  # Phase 2 convenience methods
+  def trial_calls
+    calls.where(callable_type: "Trial")
+  end
+
+  def latest_call
+    calls.order(created_at: :desc).first
+  end
+
+  def calls_with_leads
+    calls.with_captured_leads
+  end
+
   private
 
   def set_expires_at
