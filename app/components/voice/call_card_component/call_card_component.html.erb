@@ -66,6 +66,24 @@
         </details>
       </div>
     <% end %>
+
+    <!-- UPGRADE CTA -->
+    <div class="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+      <h4 class="text-sm font-semibold text-foreground mb-2">Love what you see?</h4>
+      <p class="text-sm text-muted-foreground mb-4">
+        Go live with your own phone number and capture every lead automatically.
+      </p>
+      <%= link_to "#", 
+          class: "inline-flex items-center justify-center rounded-radius-md text-sm font-medium h-11 min-h-[44px] px-8 w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors",
+          data: { 
+            controller: "analytics",
+            action: "click->analytics#trackUpgradeClick",
+            analytics_event_value: "trial_upgrade_cta_click",
+            analytics_call_id_value: call_record.id
+          } do %>
+        Go Live - Get Your Number
+      <% end %>
+    </div>
   </div>
 <% end %>
 

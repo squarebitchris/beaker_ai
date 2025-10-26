@@ -113,7 +113,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R1-E03-T006** - CallCard ViewComponent (with recording + transcript) (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E03-T006.md)
 - [x] **R1-E03-T007** - AudioPlayer component (keyboard accessible) (4 pts) ✅ [Completed](./docs/completed_tickets/R1-E03-T007.md)
 - [x] **R1-E03-T008** - TrialSessionChannel + Turbo Stream updates (4 pts) ✅ [Completed](./docs/completed_tickets/R1-E03-T008.md)
-- [ ] **R1-E03-T009** - Mini-report UI (captured fields FIRST, mobile-optimized) (5 pts)
+- [x] **R1-E03-T009** - Mini-report UI (captured fields FIRST, mobile-optimized) (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E03-T009.md)
 - [ ] **R1-E03-T010** - Upgrade CTA placement + tracking (2 pts)
 - [ ] **R1-E03-T011** - PurgeOldTrialsJob (7-day retention) (2 pts)
 - [ ] **R1-E03-T012** - Race condition prevention (unique constraints + with_lock) (3 pts)

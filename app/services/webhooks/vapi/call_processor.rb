@@ -9,6 +9,8 @@ module Webhooks
       end
 
       def process
+        start_time = Time.current
+
         return unless @payload[:type] == "call.ended"
 
         call_data = @payload[:call]
@@ -89,6 +91,26 @@ module Webhooks
 
         Rails.logger.info("[Webhook] Created/updated Call #{call.id} from Vapi webhook #{vapi_call_id} for trial #{trial.id}")
         Rails.logger.info("[Webhook] Trial #{trial.id} now has #{trial.calls_used} calls used")
+
+        # Log latency for monitoring
+        latency = Time.current - start_time
+        Rails.logger.info(
+          "[Performance] Webhook→CallCard latency: #{(latency * 1000).round(2)}ms " \
+          "(call_id: #{call.id}, trial_id: #{trial.id})"
+        )
+
+        # Alert if latency exceeds 3s SLO
+        if latency > 3.seconds
+          Sentry.capture_message(
+            "Webhook processing exceeded 3s SLO",
+            level: :warning,
+            extra: {
+              latency_ms: (latency * 1000).round(2),
+              call_id: call.id,
+              trial_id: trial.id
+            }
+          )
+        end
       rescue StandardError => e
         Rails.logger.error("[Webhook] Error processing Vapi call webhook: #{e.message}")
         Sentry.capture_exception(e, extra: { webhook_event_id: @event.id, vapi_call_id: vapi_call_id })

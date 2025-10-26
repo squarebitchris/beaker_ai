@@ -101,6 +101,34 @@ RSpec.describe Voice::CallCardComponent, type: :component do
     end
   end
 
+  describe 'upgrade CTA' do
+    let(:call) do
+      create(:call, :completed,
+        callable: trial,
+        intent: 'lead_intake',
+        duration_seconds: 120
+      )
+    end
+
+    it 'renders upgrade call-to-action' do
+      render_inline(described_class.new(call: call))
+
+      expect(page).to have_content('Love what you see?')
+      expect(page).to have_content('Go live with your own phone number')
+      expect(page).to have_link('Go Live - Get Your Number')
+    end
+
+    it 'has tracking attributes on CTA button' do
+      render_inline(described_class.new(call: call))
+
+      link = page.find('a', text: /Go Live/)
+      expect(link['data-controller']).to eq('analytics')
+      expect(link['data-action']).to eq('click->analytics#trackUpgradeClick')
+      expect(link['data-analytics-event-value']).to eq('trial_upgrade_cta_click')
+      expect(link['data-analytics-call-id-value']).to eq(call.id.to_s)
+    end
+  end
+
   describe 'intent badge variants' do
     it 'uses success variant for lead_intake' do
       call = create(:call, callable: trial, intent: 'lead_intake')
