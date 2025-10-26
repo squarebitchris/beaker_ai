@@ -1,0 +1,123 @@
+<div class="audio-player-wrapper" data-controller="audio-player" data-audio-player-recording-url-value="<%= recording_url %>">
+  <div class="relative bg-muted/50 border border-border rounded-md p-4">
+    <!-- Loading Overlay -->
+    <div data-audio-player-target="loadingOverlay" class="absolute inset-0 bg-background/80 rounded-md flex items-center justify-center z-10" data-audio-player-live-region-id="<%= loading_overlay_id %>">
+      <div class="flex items-center space-x-2">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+        <span class="text-sm text-muted-foreground">Loading audio...</span>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div data-audio-player-target="errorMessage" class="hidden">
+      <div class="text-center py-4">
+        <p class="text-sm text-destructive mb-2">Unable to load recording</p>
+        <button 
+          type="button"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-11 px-6 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          data-action="click->audio-player#retry"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+
+    <!-- Audio Player Controls -->
+    <div class="space-y-3" data-audio-player-target="controls">
+      <!-- Main Controls Row -->
+      <div class="flex items-center gap-3">
+        <!-- Play/Pause Button -->
+        <button
+          id="<%= play_button_id %>"
+          type="button"
+          class="flex-shrink-0 flex items-center justify-center h-[60px] w-[60px] rounded-full bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-all min-h-[60px] min-w-[60px]"
+          aria-label="Play recording"
+          data-audio-player-target="playButton"
+          data-action="click->audio-player#togglePlay keydown->audio-player#handleKeydown"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 play-icon" data-audio-player-target="playIcon">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 pause-icon hidden" data-audio-player-target="pauseIcon">
+            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+          </svg>
+        </button>
+
+        <!-- Progress Bar -->
+        <div class="flex-1">
+          <label class="sr-only" for="<%= progress_bar_id %>">Audio progress</label>
+          <input
+            id="<%= progress_bar_id %>"
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            class="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer progress-bar"
+            role="slider"
+            aria-label="Seek audio"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            data-audio-player-target="progressBar"
+            data-action="input->audio-player#seek keydown->audio-player#handleKeydown"
+          >
+          <!-- Time Display -->
+          <div class="flex justify-between text-xs text-muted-foreground mt-1">
+            <span id="<%= current_time_id %>" data-audio-player-target="currentTime">0:00</span>
+            <span id="<%= total_time_id %>" data-audio-player-target="totalTime">0:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Volume Control -->
+      <div class="flex items-center gap-2">
+        <label class="sr-only" for="<%= volume_control_id %>">Volume control</label>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-muted-foreground">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <input
+          id="<%= volume_control_id %>"
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
+          value="1"
+          class="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
+          role="slider"
+          aria-label="Volume"
+          aria-valuemin="0"
+          aria-valuemax="1"
+          aria-valuenow="1"
+          data-audio-player-target="volumeControl"
+          data-action="input->audio-player#updateVolume keydown->audio-player#handleKeydown"
+        >
+        <span class="text-xs text-muted-foreground min-w-[32px] text-right" data-audio-player-target="volumeDisplay">100%</span>
+      </div>
+    </div>
+
+    <!-- Hidden Audio Element -->
+    <audio
+      id="<%= audio_id %>"
+      preload="none"
+      data-audio-player-target="audio"
+      data-action="loadedmetadata->audio-player#handleLoadedMetadata error->audio-player#handleError ended->audio-player#handleEnded"
+    >
+      <source src="<%= recording_url %>" type="audio/mpeg">
+      <source src="<%= recording_url %>" type="audio/wav">
+      <source src="<%= recording_url %>" type="audio/ogg">
+      Your browser does not support the audio element.
+    </audio>
+
+    <!-- ARIA Live Region for State Announcements -->
+    <div 
+      id="<%= live_region_id %>"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      data-audio-player-target="liveRegion"
+    ></div>
+  </div>
+</div>
+

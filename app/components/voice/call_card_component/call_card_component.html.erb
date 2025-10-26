@@ -40,20 +40,14 @@
       </div>
     </div>
 
-    <!-- RECORDING PLAYER PLACEHOLDER (T007 will implement AudioPlayer) -->
+    <!-- RECORDING PLAYER -->
     <% if has_recording? %>
       <div class="space-y-2">
         <h4 class="text-sm font-semibold text-foreground">Recording</h4>
-        <div class="p-4 bg-muted/50 border border-border rounded-md text-center">
-          <p class="text-sm text-muted-foreground">
-            Audio player will be implemented in R1-E03-T007
-          </p>
-          <p class="text-xs text-muted-foreground mt-1">
-            <a href="<%= call_record.recording_url %>" target="_blank" class="underline hover:text-foreground">
-              Listen in new tab
-            </a>
-          </p>
-        </div>
+        <%= render Voice::AudioPlayerComponent.new(
+          recording_url: call_record.recording_url,
+          call_id: call_record.id
+        ) %>
       </div>
     <% end %>
 

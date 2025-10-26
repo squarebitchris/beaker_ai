@@ -45,11 +45,13 @@ RSpec.describe Voice::CallCardComponent, type: :component do
       expect(page).to have_text("Agent: Hi there!")
     end
 
-    it 'displays recording placeholder' do
+    it 'displays audio player' do
       render_inline(described_class.new(call: call))
 
       expect(page).to have_text("Recording")
-      expect(page).to have_link("Listen in new tab", href: call.recording_url)
+      expect(page).to have_css('[data-controller="audio-player"]')
+      expect(page).to have_css("audio[preload='none']")
+      expect(page).to have_css("source[src='#{call.recording_url}']")
     end
   end
 

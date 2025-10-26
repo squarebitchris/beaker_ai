@@ -4,5 +4,20 @@
 
 import { application } from "./application"
 
+import AudioPlayerController from "./audio_player_controller"
+application.register("audio-player", AudioPlayerController)
+
+import FormSubmitController from "./form_submit_controller"
+application.register("form-submit", FormSubmitController)
+
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
+
+import PhoneInputController from "./phone_input_controller"
+application.register("phone-input", PhoneInputController)
+
+import ThemeController from "./theme_controller"
+application.register("theme", ThemeController)
+
+import ToastController from "./toast_controller"
+application.register("toast", ToastController)

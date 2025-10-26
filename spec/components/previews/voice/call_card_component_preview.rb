@@ -16,7 +16,7 @@ module Voice
         transcript: "Agent: Hi, this is Sarah from Smith HVAC. How can I help you today?\nCustomer: Hi, I need a quote for a new AC unit.\nAgent: I'd be happy to help with that. Can I get your name?\nCustomer: Sure, it's Jane Smith.",
         recording_url: "https://example.com/recording.mp3"
       )
-      
+
       render(CallCardComponent.new(call: call))
     end
 
@@ -29,7 +29,7 @@ module Voice
         transcript: "Agent: Hi there!\nCustomer: Just calling to get your hours.",
         recording_url: nil
       )
-      
+
       render(CallCardComponent.new(call: call))
     end
 
@@ -47,7 +47,7 @@ module Voice
         transcript: "Agent: When would you like to schedule?\nCustomer: How about next Friday at 2pm?",
         recording_url: "https://example.com/recording2.mp3"
       )
-      
+
       render(CallCardComponent.new(call: call))
     end
 
@@ -64,9 +64,8 @@ module Voice
         transcript: "Agent: How can I assist you?\nCustomer: I have a question about pricing.",
         recording_url: "https://example.com/recording3.mp3"
       )
-      
+
       render(CallCardComponent.new(call: call))
     end
   end
 end
-
