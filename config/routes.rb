@@ -53,7 +53,11 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: "dashboard#index"
 
-    resources :webhook_events, only: [ :index, :show ]
+    resources :webhook_events, only: [ :index, :show ] do
+      member do
+        post :reprocess
+      end
+    end
     resources :businesses, only: [ :index, :show ]
     resources :users, only: [ :index, :show ]
 

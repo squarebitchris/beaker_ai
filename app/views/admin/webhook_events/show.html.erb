@@ -44,6 +44,10 @@
         <dd class="text-sm text-gray-900"><%= @webhook_event.processed_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
       </div>
     <% end %>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Retries</dt>
+      <dd class="text-sm text-gray-900"><%= @webhook_event.retries %> / 3</dd>
+    </div>
     <% if @webhook_event.error_message %>
       <div class="py-3 grid grid-cols-2 gap-4">
         <dt class="text-sm font-medium text-red-600">Error Message</dt>
@@ -53,12 +57,25 @@
   </dl>
 </div>
 
+<% if @webhook_event.failed? || @webhook_event.pending? %>
+  <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+    <p class="text-sm text-yellow-800 mb-3">
+      This event can be reprocessed. Note: This will attempt to process the webhook again with the same payload.
+    </p>
+    <%= button_to "Reprocess Event", 
+                  reprocess_admin_webhook_event_path(@webhook_event),
+                  method: :post,
+                  class: "px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700",
+                  data: { turbo_confirm: "Are you sure you want to reprocess this event? This action will re-execute webhook processing logic." } %>
+  </div>
+<% end %>
+
 <div class="bg-white rounded-lg shadow overflow-hidden">
   <div class="px-6 py-4 border-b border-gray-200">
     <h2 class="text-xl font-semibold">Payload (JSON)</h2>
   </div>
   <div class="px-6 py-4">
-    <pre class="bg-gray-50 p-4 rounded overflow-x-auto"><code class="text-sm"><%= JSON.pretty_generate(@webhook_event.payload) %></code></pre>
+    <pre class="bg-gray-50 p-4 rounded overflow-x-auto"><code class="text-sm"><%= JSON.pretty_generate(mask_pii_in_json(@webhook_event.payload)) %></code></pre>
   </div>
 </div>
 
