@@ -40,7 +40,7 @@ module Webhooks
             started_at: parse_timestamp(call_data[:startedAt]),
             ended_at: parse_timestamp(call_data[:endedAt]),
             vapi_cost: call_data[:cost],
-            extracted_lead: extract_lead_data(call_data)
+            extracted_lead: LeadExtractor.from_function_calls(call_data[:functionCalls])
           )
 
           begin
@@ -77,36 +77,6 @@ module Webhooks
         return nil unless assistant_id
 
         Trial.find_by(vapi_assistant_id: assistant_id)
-      end
-
-      def extract_lead_data(call_data)
-        # Access functionCalls with both symbol and string keys
-        function_calls = call_data[:functionCalls] || call_data["functionCalls"] || []
-        return {} if function_calls.empty?
-
-        # Find capture_lead function call (handle both string and symbol keys)
-        capture_lead = function_calls.find do |fc|
-          # Convert to indifferent access if possible
-          fc_hash = fc.is_a?(Hash) ? fc.with_indifferent_access : fc
-          name = fc_hash[:name] || fc_hash["name"]
-          name == "capture_lead"
-        end
-        return {} unless capture_lead
-
-        # Convert to indifferent access
-        capture_lead = capture_lead.with_indifferent_access
-
-        # Extract parameters
-        parameters = capture_lead[:parameters] || capture_lead["parameters"] || {}
-        parameters = parameters.with_indifferent_access rescue parameters
-
-        {
-          name: parameters[:name] || parameters["name"],
-          phone: parameters[:phone] || parameters["phone"],
-          email: parameters[:email] || parameters["email"],
-          intent: parameters[:intent] || parameters["intent"],
-          notes: parameters[:notes] || parameters["notes"]
-        }.compact
       end
 
       def parse_timestamp(timestamp_string)
