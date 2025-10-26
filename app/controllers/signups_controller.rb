@@ -5,6 +5,13 @@ class SignupsController < ApplicationController
 
   def create
     email = params.require(:email).strip.downcase
+
+    # Validate email format
+    unless email.match?(/\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i)
+      redirect_to new_signup_path, alert: "Please enter a valid email address."
+      return
+    end
+
     marketing_consent = params[:marketing_consent] == "1"
 
     # Create or find user

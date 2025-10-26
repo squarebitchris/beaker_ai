@@ -113,11 +113,9 @@ RSpec.describe 'Signups', type: :request do
       it 'redirects with error message' do
         post signups_path, params: invalid_params
 
-        # The controller doesn't validate email format, so it will succeed
-        # This test should be updated to reflect actual behavior
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(new_signup_path)
         follow_redirect!
-        expect(flash[:notice]).to be_present
+        expect(flash[:alert]).to include('valid email')
       end
     end
 

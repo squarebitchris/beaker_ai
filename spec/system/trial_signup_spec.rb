@@ -53,8 +53,8 @@ RSpec.describe 'Trial Signup Flow', type: :system do
       fill_in 'Email Address', with: 'invalid-email'
       click_button 'Start Free Trial'
 
-      # The controller doesn't validate email format, so it will succeed
-      expect(page).to have_content('Check your email')
+      expect(page).to have_content('valid email')
+      expect(page).not_to have_content('Check your email')
     end
 
     it 'handles existing user email' do
