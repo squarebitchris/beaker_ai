@@ -59,19 +59,19 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { 
-    host: ENV.fetch('APP_HOST', 'beaker-ai.herokuapp.com'),
-    protocol: 'https'
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch("APP_HOST", "beaker-ai.herokuapp.com"),
+    protocol: "https"
   }
-  
+
   # SendGrid SMTP configuration (can add SendGrid addon later)
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: 'smtp.sendgrid.net',
+    address: "smtp.sendgrid.net",
     port: 587,
-    domain: ENV.fetch('APP_HOST', 'beaker-ai.herokuapp.com'),
-    user_name: 'apikey',
-    password: ENV.fetch('SENDGRID_API_KEY', ''),
+    domain: ENV.fetch("APP_HOST", "beaker-ai.herokuapp.com"),
+    user_name: "apikey",
+    password: ENV.fetch("SENDGRID_API_KEY", ""),
     authentication: :plain,
     enable_starttls_auto: true
   }
@@ -99,9 +99,9 @@ Rails.application.configure do
   config.hosts = [
     /.*\.herokuapp\.com/,  # Allow all herokuapp.com domains
     /.*\.heroku\.app/,     # Allow heroku.app domains
-    ENV['APP_HOST']        # Allow custom domain if set
+    ENV["APP_HOST"]        # Allow custom domain if set
   ].compact
-  
+
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
