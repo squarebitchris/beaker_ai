@@ -30,8 +30,15 @@ Rails.application.routes.draw do
     end
   end
 
-  # Upgrade intent (Phase 2 placeholder, Phase 3 Stripe checkout)
+  # Stripe checkout flow (Phase 3)
+  resources :upgrades, only: [ :create ], param: :trial_id
   get "/upgrade/:trial_id", to: "upgrades#new", as: :new_upgrade
+
+  # Onboarding flow (post-checkout provisioning)
+  get "/onboarding", to: "onboarding#show", as: :onboarding
+  get "/onboarding/status", to: "onboarding#status", as: :onboarding_status
+  get "/success", to: "onboarding#success", as: :checkout_success
+  get "/cancel", to: "onboarding#cancel", as: :checkout_cancel
 
   # Webhook endpoints
   post "/webhooks/stripe", to: "webhooks#create", defaults: { provider: "stripe" }

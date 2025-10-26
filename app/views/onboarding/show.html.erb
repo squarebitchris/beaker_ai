@@ -1,0 +1,56 @@
+<div class="container mx-auto px-4 py-12 max-w-md">
+  <%= render Primitives::CardComponent.new(class: "p-8 text-center") do %>
+    <div class="space-y-6">
+      <div class="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+      </div>
+
+      <div>
+        <h1 class="text-2xl font-bold mb-2">Setting Up Your Account</h1>
+        <p class="text-muted-foreground" id="status-message">
+          Creating your AI assistant and provisioning resources...
+        </p>
+      </div>
+
+      <div class="text-sm text-muted-foreground">
+        This usually takes 10-20 seconds
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  // Poll for provisioning status
+  const sessionId = "<%= j @session_id %>";
+  const pollInterval = 3000;
+  const maxAttempts = 30;
+  let attempts = 0;
+
+  const statusMessage = document.getElementById("status-message");
+
+  const poll = setInterval(async () => {
+    attempts++;
+
+    if (attempts > maxAttempts) {
+      clearInterval(poll);
+      statusMessage.textContent = "This is taking longer than expected. Please contact support.";
+      return;
+    }
+
+    try {
+      const response = await fetch(`/onboarding/status?session_id=${sessionId}`);
+      const data = await response.json();
+
+      if (data.status === "ready") {
+        clearInterval(poll);
+        window.location.href = data.redirect_url || "/";
+      } else if (data.status === "failed") {
+        clearInterval(poll);
+        statusMessage.textContent = data.message || "Setup failed. Please contact support.";
+      }
+    } catch (error) {
+      console.error("Poll error:", error);
+    }
+  }, pollInterval);
+</script>
+

@@ -1,0 +1,92 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.stripe.com/v1/checkout/sessions
+    body:
+      encoding: UTF-8
+      string: mode=subscription&line_items[0][price]=price_test_000000000000000000000004&line_items[0][quantity]=1&customer_email=hyman%40oreilly.example&success_url=http%3A%2F%2Flocalhost%3A3000%2Fsuccess&cancel_url=http%3A%2F%2Flocalhost%3A3000%2Fcancel&metadata[trial_id]=8c3a529c-fe00-4c3e-bf7e-55906c7465fb&metadata[user_id]=f3b42a8d-04ad-4288-9880-3bc29b05ab71&metadata[plan]=pro&metadata[business_name]=Corkery-Collins
+    headers:
+      User-Agent:
+      - Stripe/v1 RubyBindings/12.6.0
+      Authorization:
+      - Bearer <STRIPE_SECRET_KEY>
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Stripe-Version:
+      - '2024-06-20'
+      X-Stripe-Client-User-Agent:
+      - '{"bindings_version":"12.6.0","lang":"ruby","lang_version":"3.4.7 p58 (2025-10-08)","platform":"arm64-darwin24","engine":"ruby","publisher":"stripe","uname":"Darwin
+        Mac 24.6.0 Darwin Kernel Version 24.6.0: Mon Jul 14 11:30:51 PDT 2025; root:xnu-11417.140.69~1/RELEASE_ARM64_T8112
+        arm64","hostname":"Mac"}'
+      Idempotency-Key:
+      - checkout:f3b42a8d-04ad-4288-9880-3bc29b05ab71:8c3a529c-fe00-4c3e-bf7e-55906c7465fb
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 400
+      message: Bad Request
+    headers:
+      Server:
+      - nginx
+      Date:
+      - Sun, 26 Oct 2025 17:45:36 GMT
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '360'
+      Connection:
+      - keep-alive
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Methods:
+      - GET, HEAD, PUT, PATCH, POST, DELETE
+      Access-Control-Allow-Origin:
+      - "*"
+      Access-Control-Expose-Headers:
+      - Request-Id, Stripe-Manage-Version, Stripe-Should-Retry, X-Stripe-External-Auth-Required,
+        X-Stripe-Privileged-Session-Required
+      Access-Control-Max-Age:
+      - '300'
+      Cache-Control:
+      - no-cache, no-store
+      Content-Security-Policy:
+      - base-uri 'none'; default-src 'none'; form-action 'none'; frame-ancestors 'none';
+        img-src 'self'; script-src 'self' 'report-sample'; style-src 'self'; worker-src
+        'none'; upgrade-insecure-requests; report-uri https://q.stripe.com/csp-violation?q=KOWedq14HZEocb4B8_UxPt5Myr6VAnSFWkJuAQKVjhf_R2sbGSz0_kkNdCmJGrrP-ZfkY27xhA5-ZPrH
+      Idempotency-Key:
+      - checkout:f3b42a8d-04ad-4288-9880-3bc29b05ab71:8c3a529c-fe00-4c3e-bf7e-55906c7465fb
+      Original-Request:
+      - req_rqUnpDlRyadmQt
+      Request-Id:
+      - req_rqUnpDlRyadmQt
+      Stripe-Version:
+      - '2024-06-20'
+      Vary:
+      - Origin
+      X-Stripe-Priority-Routing-Enabled:
+      - 'true'
+      X-Stripe-Routing-Context-Priority-Tier:
+      - livemode-critical
+      X-Wc:
+      - ABGHIJ
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+    body:
+      encoding: UTF-8
+      string: |
+        {
+          "error": {
+            "code": "resource_missing",
+            "doc_url": "https://stripe.com/docs/error-codes/resource-missing",
+            "message": "No such price: 'price_test_000000000000000000000004'",
+            "param": "line_items[0][price]",
+            "request_log_url": "https://dashboard.stripe.com/logs/req_rqUnpDlRyadmQt?t=1761500736",
+            "type": "invalid_request_error"
+          }
+        }
+  recorded_at: Sun, 26 Oct 2025 17:45:36 GMT
+recorded_with: VCR 6.3.1
