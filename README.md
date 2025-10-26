@@ -164,7 +164,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 **Epic E-005: Live Production**
 
-- [ ] **R2-E05-T001** - **ADMIN PANEL (ships FIRST)** - Base admin interface (5 pts)
+- [x] **R2-E05-T001** - **ADMIN PANEL (ships FIRST)** - Base admin interface (5 pts) ✅ [Completed](./docs/completed_tickets/R2-E05-T001.md)
 - [ ] **R2-E05-T002** - Admin: Webhook event inspector + reprocess (4 pts)
 - [ ] **R2-E05-T003** - Admin: Entity search (Business/User/Lead) (3 pts)
 - [ ] **R2-E05-T004** - Twilio client setup + number provisioning (4 pts)

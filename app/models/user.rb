@@ -17,6 +17,10 @@ class User < ApplicationRecord
 
   scope :admins, -> { where(admin: true) }
 
+  def admin?
+    admin
+  end
+
   # Check if user can create a new trial (rate limiting)
   def can_create_trial?
     # Max 2 trials per 24 hours

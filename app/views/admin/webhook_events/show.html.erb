@@ -1,0 +1,64 @@
+<div class="mb-6">
+  <%= link_to "← Back to Webhook Events", admin_webhook_events_path, class: "text-blue-600 hover:underline" %>
+</div>
+
+<h1 class="text-3xl font-bold mb-8">Webhook Event Details</h1>
+
+<div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h2 class="text-xl font-semibold">Event Information</h2>
+  </div>
+  <dl class="px-6 py-4 divide-y divide-gray-200">
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Event ID</dt>
+      <dd class="text-sm text-gray-900 font-mono"><%= @webhook_event.event_id %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Provider</dt>
+      <dd class="text-sm text-gray-900"><%= @webhook_event.provider %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Event Type</dt>
+      <dd class="text-sm text-gray-900"><%= @webhook_event.event_type %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Status</dt>
+      <dd class="text-sm">
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= case @webhook_event.status
+          when 'completed' then 'bg-green-100 text-green-800'
+          when 'failed' then 'bg-red-100 text-red-800'
+          when 'processing' then 'bg-blue-100 text-blue-800'
+          else 'bg-gray-100 text-gray-800'
+        end %>">
+          <%= @webhook_event.status %>
+        </span>
+      </dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Created At</dt>
+      <dd class="text-sm text-gray-900"><%= @webhook_event.created_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
+    </div>
+    <% if @webhook_event.processed_at %>
+      <div class="py-3 grid grid-cols-2 gap-4">
+        <dt class="text-sm font-medium text-gray-500">Processed At</dt>
+        <dd class="text-sm text-gray-900"><%= @webhook_event.processed_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
+      </div>
+    <% end %>
+    <% if @webhook_event.error_message %>
+      <div class="py-3 grid grid-cols-2 gap-4">
+        <dt class="text-sm font-medium text-red-600">Error Message</dt>
+        <dd class="text-sm text-red-800"><%= @webhook_event.error_message %></dd>
+      </div>
+    <% end %>
+  </dl>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h2 class="text-xl font-semibold">Payload (JSON)</h2>
+  </div>
+  <div class="px-6 py-4">
+    <pre class="bg-gray-50 p-4 rounded overflow-x-auto"><code class="text-sm"><%= JSON.pretty_generate(@webhook_event.payload) %></code></pre>
+  </div>
+</div>
+

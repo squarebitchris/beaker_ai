@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Admin - Beaker AI</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+  </head>
+
+  <body class="bg-gray-50">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-gray-900 text-white min-h-screen">
+        <div class="p-6">
+          <h1 class="text-2xl font-bold mb-8">Admin</h1>
+          <nav>
+            <ul class="space-y-2">
+              <li>
+                <%= link_to admin_root_path, class: "block px-4 py-2 rounded hover:bg-gray-800 #{'bg-gray-800' if request.path == admin_root_path}" do %>
+                  Dashboard
+                <% end %>
+              </li>
+              <li>
+                <%= link_to admin_webhook_events_path, class: "block px-4 py-2 rounded hover:bg-gray-800 #{'bg-gray-800' if request.path.include?('/webhook_events')}" do %>
+                  Webhook Events
+                <% end %>
+              </li>
+              <li>
+                <%= link_to admin_businesses_path, class: "block px-4 py-2 rounded hover:bg-gray-800 #{'bg-gray-800' if request.path.include?('/businesses')}" do %>
+                  Businesses
+                <% end %>
+              </li>
+              <li>
+                <%= link_to admin_users_path, class: "block px-4 py-2 rounded hover:bg-gray-800 #{'bg-gray-800' if request.path.include?('/users')}" do %>
+                  Users
+                <% end %>
+              </li>
+              <li>
+                <%= link_to sidekiq_web_path, target: "_blank", class: "block px-4 py-2 rounded hover:bg-gray-800" do %>
+                  Sidekiq →
+                <% end %>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <% if notice %>
+          <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded mb-4">
+            <%= notice %>
+          </div>
+        <% end %>
+
+        <% if alert %>
+          <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+            <%= alert %>
+          </div>
+        <% end %>
+
+        <%= yield %>
+      </main>
+    </div>
+  </body>
+</html>
+

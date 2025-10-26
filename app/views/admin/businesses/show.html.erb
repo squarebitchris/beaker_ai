@@ -1,0 +1,84 @@
+<div class="mb-6">
+  <%= link_to "← Back to Businesses", admin_businesses_path, class: "text-blue-600 hover:underline" %>
+</div>
+
+<h1 class="text-3xl font-bold mb-8">Business Details</h1>
+
+<div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h2 class="text-xl font-semibold">Business Information</h2>
+  </div>
+  <dl class="px-6 py-4 divide-y divide-gray-200">
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">ID</dt>
+      <dd class="text-sm text-gray-900 font-mono"><%= @business.id %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Name</dt>
+      <dd class="text-sm text-gray-900"><%= @business.name %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Plan</dt>
+      <dd class="text-sm text-gray-900"><%= @business.plan.upcase %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Status</dt>
+      <dd class="text-sm">
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= case @business.status
+          when 'active' then 'bg-green-100 text-green-800'
+          when 'past_due' then 'bg-yellow-100 text-yellow-800'
+          when 'canceled' then 'bg-red-100 text-red-800'
+          else 'bg-gray-100 text-gray-800'
+        end %>">
+          <%= @business.status %>
+        </span>
+      </dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Calls Used</dt>
+      <dd class="text-sm text-gray-900"><%= @business.calls_used_this_period %> / <%= @business.calls_included %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Stripe Customer ID</dt>
+      <dd class="text-sm text-gray-900 font-mono"><%= @business.stripe_customer_id %></dd>
+    </div>
+    <% if @business.stripe_subscription_id %>
+      <div class="py-3 grid grid-cols-2 gap-4">
+        <dt class="text-sm font-medium text-gray-500">Stripe Subscription ID</dt>
+        <dd class="text-sm text-gray-900 font-mono"><%= @business.stripe_subscription_id %></dd>
+      </div>
+    <% end %>
+    <% if @business.vapi_assistant_id %>
+      <div class="py-3 grid grid-cols-2 gap-4">
+        <dt class="text-sm font-medium text-gray-500">Vapi Assistant ID</dt>
+        <dd class="text-sm text-gray-900 font-mono"><%= @business.vapi_assistant_id %></dd>
+      </div>
+    <% end %>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Created At</dt>
+      <dd class="text-sm text-gray-900"><%= @business.created_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
+    </div>
+  </dl>
+</div>
+
+<% if @business.owners.any? %>
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold">Owners</h2>
+    </div>
+    <ul class="px-6 py-4 divide-y divide-gray-200">
+      <% @business.owners.each do |owner| %>
+        <li class="py-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%= owner.email %></p>
+              <p class="text-xs text-gray-500">ID: <%= owner.id %></p>
+            </div>
+            <%= link_to "View User", admin_user_path(owner), class: "text-sm text-blue-600 hover:text-blue-900" %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+

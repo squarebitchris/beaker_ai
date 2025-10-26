@@ -1,0 +1,96 @@
+<div class="mb-6">
+  <%= link_to "← Back to Users", admin_users_path, class: "text-blue-600 hover:underline" %>
+</div>
+
+<h1 class="text-3xl font-bold mb-8">User Details</h1>
+
+<div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h2 class="text-xl font-semibold">User Information</h2>
+  </div>
+  <dl class="px-6 py-4 divide-y divide-gray-200">
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">ID</dt>
+      <dd class="text-sm text-gray-900 font-mono"><%= @user.id %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Email</dt>
+      <dd class="text-sm text-gray-900"><%= @user.email %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Admin Status</dt>
+      <dd class="text-sm">
+        <% if @user.admin? %>
+          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+            Admin
+          </span>
+        <% else %>
+          <span class="text-gray-500">Regular User</span>
+        <% end %>
+      </dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Trials Count</dt>
+      <dd class="text-sm text-gray-900"><%= @user.trials.count %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Sign In Count</dt>
+      <dd class="text-sm text-gray-900"><%= @user.sign_in_count %></dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Last Sign In</dt>
+      <dd class="text-sm text-gray-900">
+        <%= @user.last_sign_in_at ? @user.last_sign_in_at.strftime('%Y-%m-%d %H:%M:%S') : 'Never' %>
+      </dd>
+    </div>
+    <div class="py-3 grid grid-cols-2 gap-4">
+      <dt class="text-sm font-medium text-gray-500">Created At</dt>
+      <dd class="text-sm text-gray-900"><%= @user.created_at.strftime('%Y-%m-%d %H:%M:%S') %></dd>
+    </div>
+  </dl>
+</div>
+
+<% if @user.trials.any? %>
+  <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold">Trials</h2>
+    </div>
+    <ul class="px-6 py-4 divide-y divide-gray-200">
+      <% @user.trials.order(created_at: :desc).each do |trial| %>
+        <li class="py-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%= trial.business_name %></p>
+              <p class="text-xs text-gray-500">
+                <%= trial.industry.upcase %> • <%= trial.status %> • <%= trial.created_at.strftime('%Y-%m-%d') %>
+              </p>
+            </div>
+            <p class="text-sm text-gray-500"><%= trial.calls_used %> / <%= trial.calls_limit %> calls</p>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<% if @user.businesses.any? %>
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold">Businesses</h2>
+    </div>
+    <ul class="px-6 py-4 divide-y divide-gray-200">
+      <% @user.businesses.each do |business| %>
+        <li class="py-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%= business.name %></p>
+              <p class="text-xs text-gray-500"><%= business.plan.upcase %> • <%= business.status %></p>
+            </div>
+            <%= link_to "View Business", admin_business_path(business), class: "text-sm text-blue-600 hover:text-blue-900" %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+

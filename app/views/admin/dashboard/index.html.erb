@@ -1,0 +1,29 @@
+<h1 class="text-3xl font-bold mb-8">Admin Dashboard</h1>
+
+<div class="grid grid-cols-3 gap-6 mb-8">
+  <div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-gray-500 text-sm font-medium uppercase mb-2">Webhook Events Today</h3>
+    <p class="text-3xl font-bold text-gray-900"><%= @webhook_events_today %></p>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-gray-500 text-sm font-medium uppercase mb-2">Total Businesses</h3>
+    <p class="text-3xl font-bold text-gray-900"><%= @businesses_total %></p>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-gray-500 text-sm font-medium uppercase mb-2">Total Users</h3>
+    <p class="text-3xl font-bold text-gray-900"><%= @users_total %></p>
+  </div>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+  <h2 class="text-xl font-semibold mb-4">Quick Links</h2>
+  <ul class="space-y-2">
+    <li><%= link_to "View All Webhook Events", admin_webhook_events_path, class: "text-blue-600 hover:underline" %></li>
+    <li><%= link_to "View All Businesses", admin_businesses_path, class: "text-blue-600 hover:underline" %></li>
+    <li><%= link_to "View All Users", admin_users_path, class: "text-blue-600 hover:underline" %></li>
+    <li><%= link_to "Sidekiq Monitoring", sidekiq_web_path, class: "text-blue-600 hover:underline", target: "_blank" %></li>
+  </ul>
+</div>
+
