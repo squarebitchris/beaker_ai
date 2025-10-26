@@ -4,6 +4,7 @@ require "rails_helper"
 
 RSpec.describe Webhooks::Vapi::CallProcessor do
   let!(:trial) { create(:trial, :active, vapi_assistant_id: "asst_123456") }
+  let!(:business) { create(:business, vapi_assistant_id: "asst_789012") }
   let(:webhook_event) { create(:webhook_event, :vapi) }
   let(:processor) { described_class.new(webhook_event) }
 
@@ -271,7 +272,7 @@ RSpec.describe Webhooks::Vapi::CallProcessor do
       end
 
       it "logs a warning" do
-        expect(Rails.logger).to receive(:warn).with(/No trial found for assistant_id/)
+        expect(Rails.logger).to receive(:warn).with(/No business or trial found for assistant_id/)
         processor.process
       end
     end
@@ -425,6 +426,105 @@ RSpec.describe Webhooks::Vapi::CallProcessor do
         expect(Rails.logger).to receive(:error).with(/Error processing Vapi call webhook/)
 
         expect { processor.process }.to raise_error(StandardError)
+      end
+    end
+
+    # NEW: Business call tests
+    context "with business calls (vapi_assistant_id from Business)" do
+      let(:webhook_event) do
+        create(:webhook_event,
+          provider: "vapi",
+          event_id: "call_business123",
+          event_type: "call.ended",
+          payload: {
+            "type" => "call.ended",
+            "call" => {
+              "id" => "call_business123",
+              "status" => "ended",
+              "duration" => 150,
+              "recordingUrl" => "https://storage.vapi.ai/recordings/call_business123.mp3",
+              "transcript" => "Agent: Hello, how can I help you?\nCustomer: I need your services.",
+              "cost" => 0.20,
+              "startedAt" => "2025-01-26T10:30:00Z",
+              "endedAt" => "2025-01-26T10:32:30Z",
+              "to" => "+15559876543",
+              "functionCalls" => [
+                {
+                  "name" => "capture_lead",
+                  "parameters" => {
+                    "name" => "Jane Smith",
+                    "phone" => "555-987-6543",
+                    "email" => "jane@example.com",
+                    "intent" => "quote_request"
+                  }
+                }
+              ]
+            },
+            "assistant" => {
+              "id" => "asst_789012"
+            }
+          })
+      end
+
+      it "creates a Call record for the business" do
+        expect { processor.process }.to change(Call, :count).by(1)
+      end
+
+      it "associates Call with Business via polymorphic callable" do
+        processor.process
+        call = Call.last
+        expect(call.callable).to eq(business)
+        expect(call.callable_type).to eq("Business")
+      end
+
+      it "sets direction to inbound for business calls" do
+        processor.process
+        call = Call.last
+        expect(call.direction).to eq("inbound")
+      end
+
+      it "increments business.calls_used_this_period" do
+        expect(business.calls_used_this_period).to eq(0)
+        processor.process
+        business.reload
+        expect(business.calls_used_this_period).to eq(1)
+      end
+
+      it "broadcasts to BusinessChannel" do
+        allow(ActionCable.server).to receive(:broadcast).and_call_original
+
+        processor.process
+
+        expect(ActionCable.server).to have_received(:broadcast).with(
+          "business:#{business.id}",
+          a_string_including("business_calls")
+        )
+      end
+    end
+
+    context "with assistant_id that matches neither trial nor business" do
+      let(:webhook_event) do
+        create(:webhook_event,
+          provider: "vapi",
+          payload: {
+            "type" => "call.ended",
+            "call" => {
+              "id" => "call_orphan123",
+              "duration" => 120
+            },
+            "assistant" => {
+              "id" => "asst_orphan999"
+            }
+          })
+      end
+
+      it "does not create a Call record" do
+        expect { processor.process }.not_to change(Call, :count)
+      end
+
+      it "logs a warning" do
+        expect(Rails.logger).to receive(:warn).with(/No business or trial found for assistant_id/)
+        processor.process
       end
     end
   end
