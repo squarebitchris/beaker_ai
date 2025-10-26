@@ -18,5 +18,9 @@ FactoryBot.define do
         create(:business_ownership, business: business, user: user)
       end
     end
+
+    trait :with_trial do
+      association :trial
+    end
   end
 end

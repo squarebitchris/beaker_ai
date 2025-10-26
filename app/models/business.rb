@@ -1,4 +1,5 @@
 class Business < ApplicationRecord
+  belongs_to :trial, optional: true
   has_many :business_ownerships, dependent: :destroy
   has_many :owners, through: :business_ownerships, source: :user
   has_many :calls, as: :callable, dependent: :destroy

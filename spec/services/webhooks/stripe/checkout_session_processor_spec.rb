@@ -37,6 +37,20 @@ RSpec.describe Webhooks::Stripe::CheckoutSessionProcessor do
         expect { processor.process }.not_to raise_error
       end
 
+      it "enqueues ConvertTrialToBusinessJob with correct parameters" do
+        expect {
+          processor.process
+        }.to have_enqueued_job(ConvertTrialToBusinessJob)
+          .with(
+            user_id: user.id,
+            trial_id: trial.id,
+            stripe_customer_id: "cus_123",
+            stripe_subscription_id: "sub_123",
+            plan: "starter",
+            business_name: "Test HVAC"
+          )
+      end
+
       it "extracts session data correctly" do
         processor.process
         # If no errors raised, extraction was successful

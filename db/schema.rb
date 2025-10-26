@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_26_172629) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_180800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -35,12 +35,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_172629) do
     t.string "status", default: "active", null: false
     t.string "stripe_customer_id", null: false
     t.string "stripe_subscription_id"
+    t.uuid "trial_id"
     t.datetime "updated_at", null: false
     t.string "vapi_assistant_id"
     t.index ["plan"], name: "index_businesses_on_plan"
     t.index ["status"], name: "index_businesses_on_status"
     t.index ["stripe_customer_id"], name: "index_businesses_on_stripe_customer_id", unique: true
     t.index ["stripe_subscription_id"], name: "index_businesses_on_stripe_subscription_id"
+    t.index ["trial_id"], name: "index_businesses_on_trial_id"
     t.index ["vapi_assistant_id"], name: "index_businesses_on_vapi_assistant_id"
   end
 
@@ -194,6 +196,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_172629) do
 
   add_foreign_key "business_ownerships", "businesses"
   add_foreign_key "business_ownerships", "users"
+  add_foreign_key "businesses", "trials"
   add_foreign_key "email_subscriptions", "users"
   add_foreign_key "trials", "scenario_templates"
   add_foreign_key "trials", "users"

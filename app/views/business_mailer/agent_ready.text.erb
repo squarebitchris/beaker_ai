@@ -1,0 +1,27 @@
+Your AI Agent is Ready!
+
+Hi <%= @user.email.split('@').first.titleize %>,
+
+Congratulations! Your subscription to the <%= @business.plan.titleize %> Plan is now active, and your AI agent is ready to help your business.
+
+AGENT DETAILS
+
+Business: <%= @business.name %>
+Plan: <%= @business.plan.titleize %> ($<%= StripePlan.for_plan(@business.plan)&.base_price_dollars || '199' %>/month)
+Calls Included: <%= @business.calls_included %> per month
+
+WHAT'S NEXT?
+
+Step 1: We're in the process of assigning you a dedicated phone number for your AI agent.
+
+Step 2: You'll receive an email when your number is ready, along with instructions on how to start receiving leads.
+
+Step 3: Your AI agent will begin answering calls immediately, capturing lead information and scheduling follow-ups.
+
+[ View Your Dashboard ]
+<%= ENV.fetch('APP_URL', 'https://beaker.ai') %>/businesses
+
+Questions? We're here to help. Reply to this email anytime.
+
+-- The Beaker AI Team
+

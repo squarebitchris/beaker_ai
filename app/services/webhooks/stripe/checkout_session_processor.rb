@@ -18,18 +18,17 @@ module Webhooks
           return
         end
 
-        # Stub job call (will be implemented in R2-E04-T005)
-        # ConvertTrialToBusinessJob.perform_later(
-        #   user_id: metadata[:user_id],
-        #   trial_id: metadata[:trial_id],
-        #   stripe_customer_id: session_data[:customer],
-        #   stripe_subscription_id: session_data[:subscription],
-        #   checkout_session_id: session_data[:id],
-        #   plan: metadata[:plan],
-        #   business_name: metadata[:business_name]
-        # )
+        # Enqueue conversion job
+        ConvertTrialToBusinessJob.perform_later(
+          user_id: metadata[:user_id],
+          trial_id: metadata[:trial_id],
+          stripe_customer_id: session_data[:customer],
+          stripe_subscription_id: session_data[:subscription],
+          plan: metadata[:plan],
+          business_name: metadata[:business_name]
+        )
 
-        Rails.logger.info("[Webhook] Would enqueue ConvertTrialToBusinessJob for session #{session_data[:id]}")
+        Rails.logger.info("[Webhook] Enqueued ConvertTrialToBusinessJob for session #{session_data[:id]}")
         Rails.logger.info("[Webhook] Metadata: #{metadata.inspect}")
       end
     end
