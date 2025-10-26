@@ -52,3 +52,8 @@ Desktop.ini
 .cache
 .config
 .local
+
+# Test coverage and persistence files
+/spec/examples.txt
+/coverage/
+.simplecov_results_*

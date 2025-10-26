@@ -101,4 +101,14 @@ group :test do
   gem "shoulda-matchers"
   gem "webmock"
   gem "vcr"
+
+  # Test coverage reporting
+  gem "simplecov", require: false
+  gem "simplecov-console", require: false
+
+  # Database cleaning for tests
+  gem "database_cleaner-active_record"
+
+  # Parallel test execution
+  gem "parallel_tests"
 end
