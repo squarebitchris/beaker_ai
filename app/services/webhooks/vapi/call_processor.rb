@@ -40,7 +40,8 @@ module Webhooks
             started_at: parse_timestamp(call_data[:startedAt]),
             ended_at: parse_timestamp(call_data[:endedAt]),
             vapi_cost: call_data[:cost],
-            extracted_lead: LeadExtractor.from_function_calls(call_data[:functionCalls])
+            extracted_lead: LeadExtractor.from_function_calls(call_data[:functionCalls]),
+            intent: IntentClassifier.call(call_data)
           )
 
           begin

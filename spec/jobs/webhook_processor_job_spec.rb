@@ -98,6 +98,8 @@ RSpec.describe WebhookProcessorJob, type: :job do
         call = Call.find_by(vapi_call_id: "call_abc123")
         expect(call).to be_present
         expect(call.callable).to eq(trial)
+        expect(call.intent).to be_present
+        expect(call.intent).to eq("info")  # Based on payload without function calls
       end
 
       it 'increments trial calls_used' do

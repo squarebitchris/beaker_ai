@@ -71,6 +71,46 @@ RSpec.describe Webhooks::Vapi::CallProcessor do
         expect(call.ended_at).to be_a(Time)
       end
 
+      it "classifies intent from function calls as lead_intake" do
+        processor.process
+        call = Call.last
+        expect(call.intent).to eq("lead_intake")
+      end
+
+      context "with scheduling function call" do
+        let(:webhook_event) do
+          create(:webhook_event,
+            provider: "vapi",
+            event_id: "call_schedule123",
+            event_type: "call.ended",
+            payload: {
+              "type" => "call.ended",
+              "call" => {
+                "id" => "call_schedule123",
+                "status" => "ended",
+                "duration" => 90,
+                "functionCalls" => [
+                  {
+                    "name" => "offer_times",
+                    "parameters" => {
+                      "times" => [ "Monday 2pm", "Tuesday 10am" ]
+                    }
+                  }
+                ]
+              },
+              "assistant" => {
+                "id" => "asst_123456"
+              }
+            })
+        end
+
+        it "classifies as scheduling" do
+          processor.process
+          call = Call.last
+          expect(call.intent).to eq("scheduling")
+        end
+      end
+
       it "increments trial.calls_used counter" do
         expect(trial.calls_used).to eq(0)
         processor.process
