@@ -1,0 +1,33 @@
+<div data-controller="business-updates" 
+     data-business-updates-business-id-value="<%= @business.id %>"
+     class="container mx-auto px-4 py-6 max-w-4xl">
+  
+  <%= turbo_stream_from @business %>
+  
+  <h1 class="text-3xl font-bold mb-6"><%= @business.name %></h1>
+  
+  <!-- Phone Number Section -->
+  <div id="business_number" class="mb-6">
+    <%= render "businesses/number", business: @business %>
+  </div>
+  
+  <!-- Stats Section -->
+  <div id="business_stats" class="mb-6">
+    <%= render "businesses/stats", business: @business %>
+  </div>
+  
+  <!-- Recent Calls -->
+  <div class="mb-6">
+    <h2 class="text-2xl font-semibold mb-4">Recent Calls</h2>
+    <div id="business_calls" class="space-y-4">
+      <% if @recent_calls.any? %>
+        <% @recent_calls.each do |call| %>
+          <%= render "businesses/call", call: call %>
+        <% end %>
+      <% else %>
+        <p class="text-muted-foreground">No calls yet. Share your number to get started!</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+

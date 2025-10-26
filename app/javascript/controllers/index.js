@@ -27,3 +27,6 @@ application.register("toast", ToastController)
 
 import TrialUpdatesController from "./trial_updates_controller"
 application.register("trial-updates", TrialUpdatesController)
+
+import BusinessUpdatesController from "./business_updates_controller"
+application.register("business-updates", BusinessUpdatesController)

@@ -1,4 +1,13 @@
-<div class="text-sm text-muted-foreground">
-  Calls this period: <strong class="text-foreground"><%= business.calls_used_this_period %></strong> of <%= business.calls_included %>
-</div>
+<%= render Primitives::CardComponent.new(class: "p-6") do |card| %>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <div class="text-sm text-muted-foreground mb-1">Calls This Period</div>
+      <div class="text-2xl font-bold"><%= business.calls_used_this_period %> / <%= business.calls_included %></div>
+    </div>
+    <div>
+      <div class="text-sm text-muted-foreground mb-1">Calls Remaining</div>
+      <div class="text-2xl font-bold"><%= business.calls_remaining %></div>
+    </div>
+  </div>
+<% end %>
 

@@ -40,6 +40,13 @@ Rails.application.routes.draw do
   get "/success", to: "onboarding#success", as: :checkout_success
   get "/cancel", to: "onboarding#cancel", as: :checkout_cancel
 
+  # Business dashboard (Phase 4)
+  resources :businesses, only: [] do
+    member do
+      get :dashboard
+    end
+  end
+
   # Webhook endpoints
   post "/webhooks/stripe", to: "webhooks#create", defaults: { provider: "stripe" }
   post "/webhooks/twilio", to: "webhooks#create", defaults: { provider: "twilio" }
@@ -64,9 +71,13 @@ Rails.application.routes.draw do
     get "/search", to: "search#index", as: :search
   end
 
-  # Authenticated users go to trials, guests see signup
+  # Authenticated users: redirect based on role
   authenticated :user do
-    root to: "trials#new", as: :authenticated_root
+    root to: redirect { |params, request|
+      user = request.env["warden"].user
+      business = user.businesses.first
+      business ? dashboard_business_path(business) : new_trial_path
+    }, as: :authenticated_root
   end
 
   root "signups#new"

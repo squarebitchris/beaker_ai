@@ -1,0 +1,16 @@
+<%= render Primitives::CardComponent.new(class: "p-6") do |card| %>
+  <% if @business.phone_number.present? %>
+    <div>
+      <div class="text-sm text-muted-foreground mb-2">Your Business Number</div>
+      <div class="text-3xl font-semibold mb-2"><%= @business.phone_number.formatted %></div>
+      <p class="text-sm text-muted-foreground">Share this number with customers to start receiving calls</p>
+    </div>
+  <% else %>
+    <div>
+      <div class="text-sm text-muted-foreground mb-2">Phone Number</div>
+      <div class="text-lg font-medium text-muted-foreground">Being assigned...</div>
+      <p class="text-sm text-muted-foreground mt-2">Your number will appear here shortly</p>
+    </div>
+  <% end %>
+<% end %>
+

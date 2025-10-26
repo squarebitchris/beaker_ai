@@ -46,7 +46,7 @@ class OnboardingController < ApplicationController
       # Business is ready! Redirect to business dashboard
       render json: {
         status: "ready",
-        redirect_url: root_path, # Phase 4 will change to business dashboard
+        redirect_url: dashboard_business_path(business),
         business_id: business.id,
         message: "Your account is ready!"
       }
