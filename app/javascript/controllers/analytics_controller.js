@@ -3,7 +3,8 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static values = { 
     event: String,
-    callId: String 
+    callId: String,
+    trialId: String
   }
 
   trackUpgradeClick(event) {
@@ -11,6 +12,7 @@ export default class extends Controller {
     console.log("Upgrade CTA clicked", {
       event: this.eventValue,
       callId: this.callIdValue,
+      trialId: this.trialIdValue,
       timestamp: new Date().toISOString()
     })
     
@@ -18,6 +20,7 @@ export default class extends Controller {
     const clicks = JSON.parse(localStorage.getItem('upgrade_clicks') || '[]')
     clicks.push({
       callId: this.callIdValue,
+      trialId: this.trialIdValue,
       timestamp: new Date().toISOString()
     })
     localStorage.setItem('upgrade_clicks', JSON.stringify(clicks))

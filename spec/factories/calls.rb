@@ -26,14 +26,14 @@ FactoryBot.define do
     end
 
     trait :with_captured_lead do
-      captured do
+      captured {
         {
           name: Faker::Name.name,
           phone: "+1#{Faker::Number.number(digits: 10)}",
           email: Faker::Internet.email,
           goal: 'Request quote'
         }
-      end
+      }
     end
 
     trait :lead_intake_scenario do

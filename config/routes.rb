@@ -30,6 +30,9 @@ Rails.application.routes.draw do
     end
   end
 
+  # Upgrade intent (Phase 2 placeholder, Phase 3 Stripe checkout)
+  get "/upgrade/:trial_id", to: "upgrades#new", as: :new_upgrade
+
   # Webhook endpoints
   post "/webhooks/stripe", to: "webhooks#create", defaults: { provider: "stripe" }
   post "/webhooks/twilio", to: "webhooks#create", defaults: { provider: "twilio" }

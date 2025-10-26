@@ -1,0 +1,31 @@
+<div class="container mx-auto px-4 py-12 max-w-md">
+  <%= render Primitives::CardComponent.new(class: "p-8 text-center") do |card| %>
+    <div class="space-y-6">
+      <div class="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+      </div>
+      
+      <div>
+        <h1 class="text-2xl font-bold text-foreground mb-2">Upgrade Coming Soon</h1>
+        <p class="text-muted-foreground">
+          We're preparing your paid plan! You'll be able to go live with your own phone number and capture every lead automatically.
+        </p>
+      </div>
+
+      <div class="p-4 bg-muted/50 rounded-lg text-left space-y-2">
+        <p class="text-sm font-semibold text-foreground">What you'll get:</p>
+        <ul class="text-sm text-muted-foreground space-y-1">
+          <li>✓ Your own dedicated phone number</li>
+          <li>✓ Unlimited inbound calls</li>
+          <li>✓ Automatic lead capture</li>
+          <li>✓ Real-time dashboard</li>
+        </ul>
+      </div>
+
+      <%= link_to "Back to Trial", trial_path(@trial), 
+          class: "inline-flex items-center justify-center rounded-radius-md text-sm font-medium h-11 px-8 w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" %>
+    </div>
+  <% end %>
+</div>

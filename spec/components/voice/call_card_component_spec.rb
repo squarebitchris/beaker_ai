@@ -126,6 +126,14 @@ RSpec.describe Voice::CallCardComponent, type: :component do
       expect(link['data-action']).to eq('click->analytics#trackUpgradeClick')
       expect(link['data-analytics-event-value']).to eq('trial_upgrade_cta_click')
       expect(link['data-analytics-call-id-value']).to eq(call.id.to_s)
+      expect(link['data-analytics-trial-id-value']).to eq(call.callable_id.to_s)
+    end
+
+    it 'links to upgrade page with trial context' do
+      render_inline(described_class.new(call: call))
+
+      link = page.find('a', text: /Go Live/)
+      expect(link['href']).to eq("/upgrade/#{call.callable_id}")
     end
   end
 
