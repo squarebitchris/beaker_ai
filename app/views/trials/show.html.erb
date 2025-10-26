@@ -78,6 +78,16 @@
             📞 Call Me Now
           <% end %>
         <% end %>
+
+        <!-- Display Recent Calls -->
+        <% if @trial.calls.any? %>
+          <div class="mt-8">
+            <h2 class="text-xl font-bold mb-4">Recent Calls</h2>
+            <% @trial.calls.order(created_at: :desc).limit(3).each do |call| %>
+              <%= render Voice::CallCardComponent.new(call: call) %>
+            <% end %>
+          </div>
+        <% end %>
       </div>
     <% end %>
   <% end %>
