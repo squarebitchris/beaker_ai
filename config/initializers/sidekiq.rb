@@ -1,5 +1,8 @@
 Sidekiq.configure_server do |config|
-  config.redis = { url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/1') }
+  config.redis = {
+    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/1'),
+    ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE }
+  }
   
   # Load recurring jobs from schedule.yml
   schedule_file = 'config/schedule.yml'
@@ -19,6 +22,9 @@ Sidekiq.configure_server do |config|
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/1') }
+  config.redis = {
+    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/1'),
+    ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE }
+  }
 end
 
