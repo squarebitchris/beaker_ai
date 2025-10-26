@@ -21,3 +21,6 @@ application.register("theme", ThemeController)
 
 import ToastController from "./toast_controller"
 application.register("toast", ToastController)
+
+import TrialUpdatesController from "./trial_updates_controller"
+application.register("trial-updates", TrialUpdatesController)

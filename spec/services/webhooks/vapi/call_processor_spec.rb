@@ -118,6 +118,19 @@ RSpec.describe Webhooks::Vapi::CallProcessor do
         expect(trial.calls_used).to eq(1)
       end
 
+      it "broadcasts turbo stream updates to trial channel" do
+        # Mock ActionCable.server.broadcast
+        allow(ActionCable.server).to receive(:broadcast).and_call_original
+
+        processor.process
+
+        # Verify broadcast was called with the correct stream name
+        expect(ActionCable.server).to have_received(:broadcast).with(
+          "trial:#{trial.id}",
+          a_string_including("trial_calls")
+        )
+      end
+
       it "extracts lead data from functionCalls" do
         processor.process
 

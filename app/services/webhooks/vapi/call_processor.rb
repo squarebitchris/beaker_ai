@@ -48,6 +48,30 @@ module Webhooks
             call.save!
             # Only increment if save was successful (truly a new call)
             trial.increment!(:calls_used)
+
+            # Broadcast new call to trial subscribers (real-time update)
+            # Generate Turbo Stream HTML for prepending the call card
+            call_html = ApplicationController.render(
+              partial: "trials/call",
+              locals: { call: call }
+            )
+
+            stats_html = ApplicationController.render(
+              partial: "trials/stats",
+              locals: { trial: trial.reload }
+            )
+
+            # Create Turbo Stream tags for prepend and replace
+            prepend_stream = %(<turbo-stream action="prepend" target="trial_calls">#{call_html}</turbo-stream>)
+            replace_stream = %(<turbo-stream action="replace" target="trial_stats">#{stats_html}</turbo-stream>)
+
+            # Broadcast both updates via ActionCable
+            ActionCable.server.broadcast(
+              "trial:#{trial.id}",
+              prepend_stream + replace_stream
+            )
+
+            Rails.logger.info("[Webhook] Broadcasted call #{call.id} to TrialChannel for trial #{trial.id}")
           rescue ActiveRecord::RecordNotUnique
             Rails.logger.info("[Webhook] Call #{vapi_call_id} already processed by another worker")
             # Another worker already processed this - don't increment

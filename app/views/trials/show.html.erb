@@ -66,7 +66,7 @@
             <p class="mt-2 text-sm text-destructive hidden error-message" role="alert"></p>
           </div>
           
-          <div class="text-sm text-muted-foreground">
+          <div id="trial_stats" class="text-sm text-muted-foreground">
             Calls remaining: <strong class="text-foreground"><%= @trial.calls_remaining %></strong> of <%= @trial.calls_limit %>
           </div>
           
@@ -79,15 +79,22 @@
           <% end %>
         <% end %>
 
+        <!-- Subscribe to real-time updates (only when trial is ready) -->
+        <div data-controller="trial-updates" data-trial-id-value="<%= @trial.id %>"></div>
+
         <!-- Display Recent Calls -->
-        <% if @trial.calls.any? %>
-          <div class="mt-8">
-            <h2 class="text-xl font-bold mb-4">Recent Calls</h2>
-            <% @trial.calls.order(created_at: :desc).limit(3).each do |call| %>
-              <%= render Voice::CallCardComponent.new(call: call) %>
+        <div class="mt-8">
+          <h2 class="text-xl font-bold mb-4">Recent Calls</h2>
+          <div id="trial_calls">
+            <% if @trial.calls.any? %>
+              <% @trial.calls.order(created_at: :desc).limit(3).each do |call| %>
+                <%= render "trials/call", call: call %>
+              <% end %>
+            <% else %>
+              <p class="text-sm text-muted-foreground">No calls yet. Click "Call Me Now" to test your assistant.</p>
             <% end %>
           </div>
-        <% end %>
+        </div>
       </div>
     <% end %>
   <% end %>
