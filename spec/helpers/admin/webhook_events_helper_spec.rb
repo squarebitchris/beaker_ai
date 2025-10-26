@@ -76,4 +76,3 @@ RSpec.describe Admin::WebhookEventsHelper do
     end
   end
 end
-

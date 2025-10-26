@@ -39,7 +39,7 @@ class TwilioClient < ApiClientBase
     end
   end
 
-  def provision_number(area_code: nil)
+  def provision_number(area_code: nil, voice_url: nil)
     with_circuit_breaker(name: "twilio:provision_number") do
       with_retry(attempts: 3) do
         # First, search for available numbers
@@ -57,7 +57,7 @@ class TwilioClient < ApiClientBase
         phone_number = available_numbers.first["phone_number"]
         purchase_payload = {
           "PhoneNumber" => phone_number,
-          "VoiceUrl" => ENV.fetch("TWILIO_VOICE_URL", "")
+          "VoiceUrl" => voice_url || ENV.fetch("TWILIO_VOICE_URL", "")
         }
 
         purchase_response = make_request(:post, "/Accounts/#{@account_sid}/IncomingPhoneNumbers.json", purchase_payload)

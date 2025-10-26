@@ -240,7 +240,7 @@ RSpec.describe ConvertTrialToBusinessJob, type: :job do
       it 'creates only one business when jobs run simultaneously' do
         # Simulate Stripe webhook arriving twice at exact same time
         # Both workers pass Business.exists? check before either creates record
-        
+
         threads = Array.new(2) do
           Thread.new do
             Thread.current.abort_on_exception = false
@@ -252,33 +252,33 @@ RSpec.describe ConvertTrialToBusinessJob, type: :job do
             end
           end
         end
-        
+
         threads.each(&:join)
-        
+
         # Only one business should exist
         expect(Business.where(stripe_subscription_id: stripe_subscription_id).count).to eq(1)
-        
+
         # Verify business has correct data
         business = Business.find_by(stripe_subscription_id: stripe_subscription_id)
         expect(business).to be_present
         expect(business.name).to eq(business_name)
         expect(business.plan).to eq(plan)
       end
-      
+
       it 'handles database constraint violation gracefully' do
         # Create business in one thread
         business1 = nil
         Thread.new do
           business1 = described_class.perform_now(**job_params)
         end.join
-        
+
         # Attempt to create duplicate (should not raise error, returns nil due to idempotency check)
         # The job returns nil when business already exists
         result = described_class.perform_now(**job_params)
-        
+
         # The job returns nil when idempotency check triggers
         expect(result).to be_nil
-        
+
         # Still only one business exists
         expect(Business.where(stripe_subscription_id: stripe_subscription_id).count).to eq(1)
       end

@@ -8,7 +8,7 @@ class CreatePhoneNumbers < ActiveRecord::Migration[8.1]
       t.string :area_code
       t.jsonb :capabilities, default: {}
       t.timestamps
-      
+
       t.index :e164, unique: true
       t.index :twilio_sid, unique: true
     end

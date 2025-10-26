@@ -1,0 +1,29 @@
+Hi <%= @user.email.split('@').first.titleize %>,
+
+Great news! We've assigned a dedicated phone number to <%= @business.name %>. Your AI agent is now ready to receive calls.
+
+📱 YOUR NUMBER
+<%= @phone_number.formatted %>
+<%= @phone_number.e164 %>
+
+✅ WHAT'S ACTIVE NOW
+• Your dedicated phone number is live
+• AI agent is ready to answer inbound calls
+• Call transcriptions and lead capture enabled
+• Real-time dashboard updates
+
+🎯 NEXT STEPS
+1. Test your number: Call <%= @phone_number.formatted %> to hear your AI agent in action
+2. Share your number: Add <%= @phone_number.formatted %> to your website, business cards, or online profiles
+3. Monitor calls: Check your dashboard to see calls, transcripts, and captured leads
+4. Set up lead forms: Coming soon - create hosted forms that trigger instant callbacks
+
+💡 PRO TIP: This number will ring through to your AI agent 24/7. Make sure to let your team know that this number is automated, not a live receptionist.
+
+View your dashboard:
+<%= ENV.fetch('APP_URL', 'https://beaker.ai') %>/businesses
+
+Questions? We're here to help. Reply to this email anytime.
+
+— The Beaker AI Team
+

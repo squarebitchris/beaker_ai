@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+  </head>
+  <body style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;">
+    
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+      <h1 style="color: white; margin: 0; font-size: 28px;">📞 Your Phone Number is Ready!</h1>
+    </div>
+    
+    <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+      <p style="margin-top: 0; font-size: 16px; color: #4b5563;">Hi <%= @user.email.split('@').first.titleize %>,</p>
+      
+      <p style="font-size: 16px; color: #4b5563;">
+        Great news! We've assigned a dedicated phone number to <strong><%= @business.name %></strong>. Your AI agent is now ready to receive calls.
+      </p>
+      
+      <div style="background: white; border: 2px solid #10b981; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+        <h2 style="margin-top: 0; color: #10b981; font-size: 24px; margin-bottom: 8px;">📱 Your Number</h2>
+        <div style="font-size: 32px; font-weight: bold; color: #059669; margin: 16px 0; letter-spacing: 1px;">
+          <%= @phone_number.formatted %>
+        </div>
+        <div style="font-size: 18px; color: #6b7280; margin: 8px 0;">
+          <%= @phone_number.e164 %>
+        </div>
+      </div>
+      
+      <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 16px; margin: 24px 0; border-radius: 4px;">
+        <h3 style="margin-top: 0; color: #047857; font-size: 18px;">✅ What's Active Now</h3>
+        <ul style="margin: 0; padding-left: 20px; color: #065f46; font-size: 15px;">
+          <li style="margin-bottom: 8px;">Your dedicated phone number is live</li>
+          <li style="margin-bottom: 8px;">AI agent is ready to answer inbound calls</li>
+          <li style="margin-bottom: 8px;">Call transcriptions and lead capture enabled</li>
+          <li>Real-time dashboard updates</li>
+        </ul>
+      </div>
+      
+      <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 16px; margin: 24px 0; border-radius: 4px;">
+        <h3 style="margin-top: 0; color: #1e40af; font-size: 18px;">🎯 Next Steps</h3>
+        <ol style="margin: 0; padding-left: 20px; color: #1e40af; font-size: 15px;">
+          <li style="margin-bottom: 8px;"><strong>Test your number:</strong> Call <%= @phone_number.formatted %> to hear your AI agent in action</li>
+          <li style="margin-bottom: 8px;"><strong>Share your number:</strong> Add <%= @phone_number.formatted %> to your website, business cards, or online profiles</li>
+          <li style="margin-bottom: 8px;"><strong>Monitor calls:</strong> Check your dashboard to see calls, transcripts, and captured leads</li>
+          <li><strong>Set up lead forms:</strong> Coming soon - create hosted forms that trigger instant callbacks</li>
+        </ol>
+      </div>
+      
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 24px 0; border-radius: 4px;">
+        <p style="margin: 0; color: #92400e; font-size: 14px;">
+          <strong>💡 Pro Tip:</strong> This number will ring through to your AI agent 24/7. Make sure to let your team know that this number is automated, not a live receptionist.
+        </p>
+      </div>
+      
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="<%= ENV.fetch('APP_URL', 'https://beaker.ai') %>/businesses" 
+           style="display: inline-block; background: #10b981; color: white; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: 600; font-size: 16px;">
+          Open Your Dashboard
+        </a>
+      </div>
+      
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0;">
+      
+      <p style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">
+        <strong>Questions?</strong> We're here to help. Reply to this email anytime.
+      </p>
+      
+      <p style="font-size: 14px; color: #9ca3af; margin-bottom: 0;">
+        &mdash; The Beaker AI Team
+      </p>
+    </div>
+    
+  </body>
+</html>
+

@@ -31,6 +31,11 @@ class Business < ApplicationRecord
     phone_number.present?
   end
 
+  def webhook_url_with_business_id
+    base_url = ENV.fetch("APP_URL", "http://localhost:3000")
+    "#{base_url}/webhooks/vapi?business_id=#{id}"
+  end
+
   private
 
   def set_calls_included

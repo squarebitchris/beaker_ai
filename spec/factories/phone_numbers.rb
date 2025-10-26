@@ -8,4 +8,3 @@ FactoryBot.define do
     capabilities { { voice: true, sms: true } }
   end
 end
-

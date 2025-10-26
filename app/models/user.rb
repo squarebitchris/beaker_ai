@@ -21,6 +21,10 @@ class User < ApplicationRecord
     admin
   end
 
+  def owns?(business)
+    businesses.include?(business)
+  end
+
   # Check if user can create a new trial (rate limiting)
   def can_create_trial?
     # Max 2 trials per 24 hours

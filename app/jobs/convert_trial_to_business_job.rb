@@ -2,7 +2,7 @@
 
 class ConvertTrialToBusinessJob < ApplicationJob
   queue_as :default
-  retry_on StandardError, wait: :exponentially_longer, attempts: 3
+  retry_on StandardError, wait: 5.seconds, attempts: 3
 
   def perform(user_id:, trial_id:, stripe_customer_id:, stripe_subscription_id:, plan:, business_name:)
     user = User.find(user_id)
@@ -56,6 +56,16 @@ class ConvertTrialToBusinessJob < ApplicationJob
         # Don't fail the job if email fails, but track it
         Sentry.capture_exception(e, extra: { business_id: business.id, user_email: user.email })
         Rails.logger.error("[ConvertTrialToBusinessJob] Failed to queue agent ready email: #{e.message}")
+      end
+
+      # 7. Assign Twilio number automatically
+      begin
+        AssignTwilioNumberJob.perform_later(business.id)
+        Rails.logger.info("[ConvertTrialToBusinessJob] Assigned Twilio number job queued for business #{business.id}")
+      rescue => e
+        # Don't fail the job if number assignment fails - it can be retried
+        Sentry.capture_exception(e, extra: { business_id: business.id })
+        Rails.logger.error("[ConvertTrialToBusinessJob] Failed to queue number assignment: #{e.message}")
       end
 
       business
