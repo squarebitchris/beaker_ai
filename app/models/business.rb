@@ -3,7 +3,7 @@ class Business < ApplicationRecord
   has_many :business_ownerships, dependent: :destroy
   has_many :owners, through: :business_ownerships, source: :user
   has_many :calls, as: :callable, dependent: :destroy
-  # has_one :phone_number, dependent: :destroy  # TODO: Create PhoneNumber model in Phase 4
+  has_one :phone_number, dependent: :destroy
 
   enum :status, { active: "active", past_due: "past_due", canceled: "canceled" }
   enum :plan, { starter: "starter", pro: "pro" }
@@ -25,6 +25,10 @@ class Business < ApplicationRecord
 
   def stripe_price_id
     StripePlan.for_plan(plan)&.stripe_price_id
+  end
+
+  def has_phone_number?
+    phone_number.present?
   end
 
   private

@@ -237,6 +237,47 @@ RSpec.describe TwilioClient, vcr: false do
     end
   end
 
+  describe '#update_number_webhook' do
+    let(:number_sid) { 'PN1234567890abcdef' }
+    let(:voice_url) { 'https://example.com/voice' }
+
+    before do
+      allow(ENV).to receive(:fetch).with('TWILIO_STATUS_CALLBACK_URL', '').and_return('http://localhost:3000/webhooks/twilio')
+    end
+
+    context 'when update succeeds' do
+      it 'updates voice URL and returns response' do
+        stub_request(:post, "https://api.twilio.com/2010-04-01/Accounts/test_account_sid/IncomingPhoneNumbers/#{number_sid}.json")
+          .with(
+            headers: {
+              'Authorization' => "Basic #{Base64.strict_encode64('test_account_sid:test_auth_token')}",
+              'Content-Type' => 'application/x-www-form-urlencoded'
+            }
+          )
+          .to_return(
+            status: 200,
+            body: { sid: number_sid, voice_url: voice_url }.to_json
+          )
+
+        result = client.update_number_webhook(number_sid: number_sid, voice_url: voice_url)
+
+        expect(result['sid']).to eq(number_sid)
+        expect(result['voice_url']).to eq(voice_url)
+      end
+    end
+
+    context 'when update fails' do
+      it 'raises ApiError' do
+        stub_request(:post, /IncomingPhoneNumbers\/#{number_sid}\.json/)
+          .to_return(status: 404, body: 'Not Found')
+
+        expect {
+          client.update_number_webhook(number_sid: number_sid, voice_url: voice_url)
+        }.to raise_error(ApiClientBase::ApiError, /Twilio update error: 404/)
+      end
+    end
+  end
+
   describe 'initialization' do
     it 'sets up HTTP client with correct credentials' do
       expect(client.instance_variable_get(:@account_sid)).to eq('test_account_sid')

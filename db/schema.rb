@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_26_192229) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_213937) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -111,6 +111,20 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_192229) do
     t.index ["industry"], name: "index_knowledge_bases_on_industry"
   end
 
+  create_table "phone_numbers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "area_code"
+    t.uuid "business_id", null: false
+    t.jsonb "capabilities", default: {}
+    t.string "country", default: "US", null: false
+    t.datetime "created_at", null: false
+    t.string "e164", null: false
+    t.string "twilio_sid", null: false
+    t.datetime "updated_at", null: false
+    t.index ["business_id"], name: "index_phone_numbers_on_business_id"
+    t.index ["e164"], name: "index_phone_numbers_on_e164", unique: true
+    t.index ["twilio_sid"], name: "index_phone_numbers_on_twilio_sid", unique: true
+  end
+
   create_table "scenario_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
@@ -199,6 +213,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_192229) do
   add_foreign_key "business_ownerships", "users"
   add_foreign_key "businesses", "trials"
   add_foreign_key "email_subscriptions", "users"
+  add_foreign_key "phone_numbers", "businesses"
   add_foreign_key "trials", "scenario_templates"
   add_foreign_key "trials", "users"
 end

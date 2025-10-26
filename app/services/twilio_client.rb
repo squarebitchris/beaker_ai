@@ -87,6 +87,25 @@ class TwilioClient < ApiClientBase
     end
   end
 
+  def update_number_webhook(number_sid:, voice_url:)
+    with_circuit_breaker(name: "twilio:update_number_webhook") do
+      with_retry(attempts: 3) do
+        payload = {
+          "VoiceUrl" => voice_url,
+          "VoiceMethod" => "POST",
+          "StatusCallback" => ENV.fetch("TWILIO_STATUS_CALLBACK_URL", ""),
+          "StatusCallbackMethod" => "POST"
+        }
+
+        response = make_request(:post, "/Accounts/#{@account_sid}/IncomingPhoneNumbers/#{number_sid}.json", payload)
+
+        raise ApiError, "Twilio update error: #{response.code}" unless (200..299).include?(response.code.to_i)
+
+        JSON.parse(response.body)
+      end
+    end
+  end
+
   private
 
   def make_request(method, path, payload = nil)

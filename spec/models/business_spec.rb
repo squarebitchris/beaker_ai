@@ -5,7 +5,25 @@ RSpec.describe Business, type: :model do
     it { should have_many(:business_ownerships).dependent(:destroy) }
     it { should have_many(:owners).through(:business_ownerships) }
     it { should have_many(:calls).dependent(:destroy) }
-    # it { should have_one(:phone_number).dependent(:destroy) }  # TODO: Create PhoneNumber model in Phase 4
+    it { should have_one(:phone_number).dependent(:destroy) }
+  end
+
+  describe '#has_phone_number?' do
+    it 'responds to has_phone_number?' do
+      business = build(:business)
+      expect(business).to respond_to(:has_phone_number?)
+    end
+
+    it 'returns false when no phone number' do
+      business = build(:business)
+      expect(business.has_phone_number?).to be false
+    end
+
+    it 'returns true when phone number exists' do
+      business = create(:business)
+      create(:phone_number, business: business)
+      expect(business.has_phone_number?).to be true
+    end
   end
 
   describe 'validations' do
@@ -23,7 +41,7 @@ RSpec.describe Business, type: :model do
     it 'enforces unique stripe_subscription_id (Rails validation first)' do
       # Create first business with subscription_id
       create(:business, stripe_subscription_id: 'sub_unique123')
-      
+
       # Attempt to create duplicate - Rails validation catches it first
       expect {
         Business.create!(
@@ -35,11 +53,11 @@ RSpec.describe Business, type: :model do
         )
       }.to raise_error(ActiveRecord::RecordInvalid, /Stripe subscription has already been taken/)
     end
-    
+
     it 'allows multiple businesses with NULL subscription_id' do
       business1 = create(:business, stripe_subscription_id: nil)
       business2 = create(:business, stripe_subscription_id: nil)
-      
+
       expect(business1).to be_persisted
       expect(business2).to be_persisted
     end
