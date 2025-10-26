@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_26_064023) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_172629) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -118,6 +118,20 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_064023) do
     t.integer "version", null: false
     t.index ["key", "active"], name: "idx_unique_active_scenario_template", unique: true, where: "(active = true)"
     t.index ["key"], name: "index_scenario_templates_on_key"
+  end
+
+  create_table "stripe_plans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.integer "base_price_cents", null: false
+    t.integer "calls_included", null: false
+    t.datetime "created_at", null: false
+    t.integer "overage_cents_per_call", null: false
+    t.string "plan_name", null: false
+    t.string "stripe_price_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_stripe_plans_on_active"
+    t.index ["plan_name"], name: "index_stripe_plans_on_plan_name", unique: true
+    t.index ["stripe_price_id"], name: "index_stripe_plans_on_stripe_price_id", unique: true
   end
 
   create_table "trials", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

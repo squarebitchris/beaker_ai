@@ -21,12 +21,20 @@ class Business < ApplicationRecord
     calls_used_this_period >= calls_included
   end
 
+  def stripe_price_id
+    StripePlan.for_plan(plan)&.stripe_price_id
+  end
+
   private
 
   def set_calls_included
-    self.calls_included ||= case plan
+    self.calls_included ||= StripePlan.for_plan(plan)&.calls_included || default_calls_for_plan
+  end
+
+  def default_calls_for_plan
+    case plan
     when "starter" then 100
-    when "pro" then 500
+    when "pro" then 300  # Updated from 500 to protect margins
     else 100
     end
   end

@@ -75,4 +75,27 @@ class StripeClient < ApiClientBase
   rescue Stripe::StripeError => e
     raise ApiError, "Stripe API error: #{e.message}"
   end
+
+  def self.validate_configuration!
+    errors = []
+
+    StripePlan.active.find_each do |plan|
+      if plan.stripe_price_id.include?("PLACEHOLDER") || plan.stripe_price_id.include?("CHANGEME")
+        errors << "#{plan.plan_name} plan has placeholder price ID: #{plan.stripe_price_id}"
+      end
+
+      # Verify price exists in Stripe (optional, can be expensive)
+      # begin
+      #   Stripe::Price.retrieve(plan.stripe_price_id)
+      # rescue Stripe::InvalidRequestError => e
+      #   errors << "#{plan.plan_name} price ID invalid: #{e.message}"
+      # end
+    end
+
+    raise ConfigurationError, errors.join("; ") if errors.any?
+
+    true
+  end
+
+  class ConfigurationError < StandardError; end
 end

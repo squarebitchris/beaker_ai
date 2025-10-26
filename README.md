@@ -135,7 +135,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 **Epic E-004: Monetization**
 
 - [x] **R2-E04-T001** - Stripe client setup + API keys (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T001.md)
-- [ ] **R2-E04-T002** - Create Stripe products/prices (Starter $199, Pro $499) (2 pts)
+- [x] **R2-E04-T002** - Create Stripe products/prices (Starter $199, Pro $499) (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T002.md)
 - [ ] **R2-E04-T003** - Checkout session endpoint (3 pts)
 - [ ] **R2-E04-T004** - Stripe webhook handler (checkout.session.completed) (4 pts)
 - [ ] **R2-E04-T005** - ConvertTrialToBusinessJob (5 pts)
@@ -457,7 +457,11 @@ SENTRY_DSN=your_sentry_dsn  # Optional but recommended
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_SUCCESS_URL=https://your-app.com/success
+STRIPE_CANCEL_URL=https://your-app.com/cancel
 ```
+
+**Note:** Stripe products and prices are created programmatically using `rails stripe:sync_products`. No manual Stripe Dashboard setup required.
 
 **Webhook Callbacks:**
 ```bash
@@ -468,6 +472,28 @@ STRIPE_CANCEL_URL=https://your-app.com/checkout/cancel
 ```
 
 See [Environment Variables Documentation](./docs/environment-variables.md) for complete details.
+
+### Stripe Setup (Phase 3)
+
+**Automated Product Creation:**
+
+Beaker AI creates Stripe products programmatically - no manual Dashboard setup needed!
+
+```bash
+# 1. Get your Stripe API key from dashboard.stripe.com
+# Add to .env: STRIPE_SECRET_KEY=sk_test_...
+
+# 2. Seed database with placeholders
+rails db:seed
+
+# 3. Create products in Stripe
+rails stripe:sync_products
+
+# 4. Verify configuration
+rails stripe:verify
+```
+
+See [Stripe Setup Guide](./docs/stripe-setup-guide.md) for complete details.
 
 ## Key Metrics & Success Criteria
 

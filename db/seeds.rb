@@ -135,3 +135,28 @@ puts "Knowledge base seeding complete!"
 puts "  - HVAC: #{KnowledgeBase.for_industry('hvac').count} entries"
 puts "  - Gym: #{KnowledgeBase.for_industry('gym').count} entries"
 puts "  - Dental: #{KnowledgeBase.for_industry('dental').count} entries"
+
+# Seed Stripe Plans - create placeholders only
+# NOTE: Run 'rails stripe:sync_products' to create actual Stripe products
+puts "\nSeeding Stripe plans..."
+
+StripePlan.find_or_create_by!(plan_name: "starter") do |plan|
+  plan.stripe_price_id = ENV.fetch("STRIPE_PRICE_STARTER", "price_starter_PLACEHOLDER")
+  plan.base_price_cents = 199_00
+  plan.calls_included = 100
+  plan.overage_cents_per_call = 150
+  plan.active = true
+end
+
+StripePlan.find_or_create_by!(plan_name: "pro") do |plan|
+  plan.stripe_price_id = ENV.fetch("STRIPE_PRICE_PRO", "price_pro_PLACEHOLDER")
+  plan.base_price_cents = 499_00
+  plan.calls_included = 300  # Updated from 500 to protect margins
+  plan.overage_cents_per_call = 125
+  plan.active = true
+end
+
+puts "Stripe plans seeding complete!"
+puts "  - Starter: $199/mo, 100 calls"
+puts "  - Pro: $499/mo, 300 calls"
+puts "\nRun 'rails stripe:sync_products' to create products in Stripe"

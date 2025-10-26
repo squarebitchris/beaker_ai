@@ -45,7 +45,7 @@ RSpec.describe Business, type: :model do
     it 'sets calls_included for pro plan' do
       business = Business.new(plan: 'pro', name: 'Test', stripe_customer_id: 'cus_test')
       business.valid?  # Trigger validations and callbacks
-      expect(business.calls_included).to eq(500)
+      expect(business.calls_included).to eq(300)  # Updated from 500 to protect margins
     end
 
     # Remove test for unknown plan since enum validation prevents it

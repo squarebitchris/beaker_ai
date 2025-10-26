@@ -310,4 +310,53 @@ RSpec.describe StripeClient, vcr: false do
       expect(Stripe.api_key).to eq('sk_test_1234567890')
     end
   end
+
+  describe '.validate_configuration!' do
+    before do
+      # Create valid StripePlan records
+      create(:stripe_plan, :starter, stripe_price_id: 'price_valid_starter_123')
+      create(:stripe_plan, :pro, stripe_price_id: 'price_valid_pro_123')
+    end
+
+    context 'when all plans have valid price IDs' do
+      it 'returns true without errors' do
+        expect(StripeClient.validate_configuration!).to be true
+      end
+    end
+
+    context 'when a plan has placeholder price ID' do
+      before do
+        create(:stripe_plan, :starter, :with_placeholder, plan_name: 'enterprise', active: true)
+      end
+
+      it 'raises ConfigurationError with error message' do
+        expect {
+          StripeClient.validate_configuration!
+        }.to raise_error(StripeClient::ConfigurationError, /enterprise plan has placeholder price ID/)
+      end
+    end
+
+    context 'when a plan has CHANGEME price ID' do
+      before do
+        invalid_plan = create(:stripe_plan, plan_name: 'trial', active: true)
+        invalid_plan.update_column(:stripe_price_id, 'price_starter_CHANGEME')
+      end
+
+      it 'raises ConfigurationError' do
+        expect {
+          StripeClient.validate_configuration!
+        }.to raise_error(StripeClient::ConfigurationError, /trial plan has placeholder price ID/)
+      end
+    end
+
+    context 'when all plans are inactive' do
+      before do
+        StripePlan.update_all(active: false)
+      end
+
+      it 'returns true (no active plans to validate)' do
+        expect(StripeClient.validate_configuration!).to be true
+      end
+    end
+  end
 end
