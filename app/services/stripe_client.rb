@@ -14,7 +14,8 @@ class StripeClient < ApiClientBase
         customer_email: customer_email,
         success_url: ENV.fetch("STRIPE_SUCCESS_URL"),
         cancel_url: ENV.fetch("STRIPE_CANCEL_URL"),
-        metadata: metadata
+        metadata: metadata,
+        automatic_tax: { enabled: true }
       }
 
       options = {}

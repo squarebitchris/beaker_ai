@@ -8,19 +8,20 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 ## Tech Stack
 
-**✅ Current Implementation (Phase 0-1 Complete):**
+**✅ Current Implementation (Phase 0-3 Complete):**
 - Using **Sidekiq 7.2** with Redis for background job processing
 - **Sidekiq Web UI** at `/sidekiq` for monitoring (admin-protected)
 - **Sidekiq-Cron** for recurring jobs (trial reaper, analytics)
 - Deployed to **Heroku production** with LIVE API keys
-- **Phase 1 Trial Flow** fully operational with personalized AI agents
+- **Phase 1-2 Trial Flow** fully operational with personalized AI agents, webhooks, and lead capture
+- **Phase 3 Stripe Integration** complete with automatic tax, checkout, and business conversion
 
 **Stack:**
 - **Backend:** Ruby on Rails 8.1, PostgreSQL (UUID), Sidekiq + Redis
 - **Frontend:** Turbo, Stimulus, Tailwind CSS, ViewComponents
 - **Voice AI:** Vapi.ai (OpenAI GPT-4 + ElevenLabs voices)
 - **Telephony:** Twilio (outbound calls, future inbound routing)
-- **Payments:** Stripe (ready for Phase 3)
+- **Payments:** Stripe (automatic tax, subscriptions, checkout - Phase 3 complete)
 - **Email:** SendGrid (magic links, notifications)
 - **Observability:** Sentry error tracking, Sidekiq monitoring
 
@@ -145,14 +146,17 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R2-E04-T009** - "Agent Ready" email template (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T009.md)
 - [x] **R2-E04-T010** - Idempotency testing (prevent duplicate businesses) (3 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T010.md)
 - [x] **R2-E04-T011** - Upgrade button in trial UI (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T011.md)
-- [ ] **R2-E04-T012** - Stripe Tax configuration (2 pts)
+- [x] **R2-E04-T012** - Stripe Tax configuration (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T012.md)
 
 **Exit Criteria:**
-- Trial → Upgrade → Stripe Checkout → Business created
-- Paid assistant created (no time caps)
-- Trial marked "converted"
-- No duplicate businesses on webhook retry
-- Conversion latency ≤5s
+- ✅ Trial → Upgrade → Stripe Checkout → Business created
+- ✅ Paid assistant created (no time caps)
+- ✅ Trial marked "converted"
+- ✅ No duplicate businesses on webhook retry
+- ✅ Conversion latency ≤5s
+- ✅ Automatic tax calculation enabled for all checkouts
+
+**Summary:** Phase 3 delivers complete Stripe integration with automatic tax calculation, subscription management, business conversion workflow, and comprehensive idempotency protection. All 12 tickets complete with full test coverage. Ready for Phase 4 (Dashboard + Admin Panel).
 
 ---
 
@@ -450,9 +454,9 @@ SENDGRID_API_KEY=your_sendgrid_key
 SENTRY_DSN=your_sentry_dsn  # Optional but recommended
 ```
 
-### Phase 3+ Variables (Future)
+### Phase 3: Stripe (Payments) - ✅ Complete
 
-**Stripe (Payments):**
+**Stripe Integration:**
 ```bash
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -473,11 +477,18 @@ STRIPE_CANCEL_URL=https://your-app.com/checkout/cancel
 
 See [Environment Variables Documentation](./docs/environment-variables.md) for complete details.
 
-### Stripe Setup (Phase 3)
+### Stripe Setup (Phase 3) - ✅ Complete
 
 **Automated Product Creation:**
 
 Beaker AI creates Stripe products programmatically - no manual Dashboard setup needed!
+
+**Automatic Tax Configuration:**
+
+Stripe Tax is automatically enabled for all checkout sessions. Configure tax settings in your Stripe Dashboard:
+- Go to Settings → Tax
+- Enable Stripe Tax
+- Configure nexus states for production
 
 ```bash
 # 1. Get your Stripe API key from dashboard.stripe.com

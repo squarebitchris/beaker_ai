@@ -191,13 +191,14 @@ ls app/services/stripe_client.rb
 - Track clicks for analytics
 
 #### 12. **Stripe Tax Configuration**
-**Status:** NEEDS SETUP  
+**Status:** ✅ COMPLETED  
 **Ticket:** R2-E04-T012
 
-**What's Needed:**
-- Enable Stripe Tax in Stripe Dashboard
-- Configure tax calculation for US states
-- Add `automatic_tax: { enabled: true }` to checkout session
+**What Was Done:**
+- Added `automatic_tax: { enabled: true }` to all checkout sessions in StripeClient
+- Enabled by default (no environment variable toggle needed)
+- Comprehensive test coverage at service and integration levels
+- Completion doc created with Stripe Dashboard setup instructions
 
 ---
 

@@ -120,6 +120,18 @@ RSpec.describe "Upgrades", type: :request do
         expect(session[:upgrade_intent][:trial_id]).to eq(trial.id)
         expect(session[:upgrade_intent][:plan]).to eq("pro")
       end
+
+      it "creates checkout session with automatic tax enabled" do
+        # Verify that automatic_tax parameter is passed through to Stripe
+        expect(Stripe::Checkout::Session).to receive(:create) do |params, _options|
+          expect(params).to include(automatic_tax: { enabled: true })
+          double('Stripe::Checkout::Session', id: 'cs_test_123', url: 'https://checkout.stripe.com/test/123')
+        end
+
+        post upgrades_path(trial_id: trial.id), params: { plan: "starter" }
+
+        expect(response).to have_http_status(:redirect)
+      end
     end
 
     context "with invalid plan" do

@@ -53,6 +53,26 @@ RSpec.describe StripeClient, vcr: false do
           idempotency_key: idempotency_key
         )
       end
+
+      it 'includes automatic_tax parameter' do
+        checkout_session = double('Stripe::Checkout::Session',
+          id: 'cs_test_1234567890',
+          url: 'https://checkout.stripe.com/pay/cs_test_1234567890'
+        )
+
+        expect(Stripe::Checkout::Session).to receive(:create).with(
+          hash_including(automatic_tax: { enabled: true }),
+          anything
+        ).and_return(checkout_session)
+
+        result = client.create_checkout_session(
+          price_id: price_id,
+          customer_email: customer_email,
+          metadata: metadata
+        )
+
+        expect(result.id).to eq('cs_test_1234567890')
+      end
     end
 
     context 'when API fails' do
