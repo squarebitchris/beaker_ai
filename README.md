@@ -8,20 +8,21 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 ## Tech Stack
 
-**⚠️ Phase 0 Implementation Notes:**
-- Using **SolidQueue** (Rails 8.1 built-in) instead of Sidekiq for background jobs
-- **Redis only for Rack::Attack** rate limiting (not for jobs)
-- **Mission Control Jobs** at `/jobs` for monitoring (not Sidekiq Web UI)
-- Deployed to **Heroku production** with LIVE API keys (no staging environment)
-- **4 ViewComponents** (Button, Input, Card, Toast) - Badge/Dialog/Checkbox/Select deferred to Phase 1+
+**✅ Current Implementation (Phase 0-1 Complete):**
+- Using **Sidekiq 7.2** with Redis for background job processing
+- **Sidekiq Web UI** at `/sidekiq` for monitoring (admin-protected)
+- **Sidekiq-Cron** for recurring jobs (trial reaper, analytics)
+- Deployed to **Heroku production** with LIVE API keys
+- **Phase 1 Trial Flow** fully operational with personalized AI agents
 
-- **Backend:** Ruby on Rails 8.1, PostgreSQL (UUID), SolidQueue/SolidCache
+**Stack:**
+- **Backend:** Ruby on Rails 8.1, PostgreSQL (UUID), Sidekiq + Redis
 - **Frontend:** Turbo, Stimulus, Tailwind CSS, ViewComponents
-- **Voice AI:** Vapi.ai (OpenAI + ElevenLabs)
-- **Telephony:** Twilio
-- **Payments:** Stripe
-- **Email:** SendGrid/Resend
-- **Observability:** Sentry (Lograge removed due to Rails 8 compatibility)
+- **Voice AI:** Vapi.ai (OpenAI GPT-4 + ElevenLabs voices)
+- **Telephony:** Twilio (outbound calls, future inbound routing)
+- **Payments:** Stripe (ready for Phase 3)
+- **Email:** SendGrid (magic links, notifications)
+- **Observability:** Sentry error tracking, Sidekiq monitoring
 
 ## Project Phases Overview
 
@@ -58,12 +59,13 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R1-E01-T012** - Create design system foundation (4 components) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T012.md) **Note:** 4 components (not 8), deferred rest to Phase 1+
 
 **Exit Criteria:**
-- ✅ Rails app boots locally with Postgres + SolidQueue
-- ✅ Magic-link auth working
-- ✅ SolidQueue processing jobs (Mission Control UI at `/jobs`)
-- ✅ Comprehensive test infrastructure (RSpec + FactoryBot + coverage)
-- ✅ CI pipeline green
+- ✅ Rails app boots locally with Postgres + Sidekiq + Redis
+- ✅ Magic-link auth working (passwordless via Devise)
+- ✅ Sidekiq processing jobs (Web UI at `/sidekiq`)
+- ✅ Comprehensive test infrastructure (RSpec + FactoryBot + 94% coverage)
+- ✅ CI pipeline green (GitHub Actions)
 - ✅ Production deployment successful (Heroku with LIVE API keys)
+- ✅ Design system with 4 core components (Button, Input, Card, Toast)
 
 ---
 
@@ -88,10 +90,14 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [ ] **R1-E02-T015** - Pre-launch validation (100 cold emails to HVAC) (5 pts)
 
 **Exit Criteria:**
-- Visitor can sign up → build personalized agent → receive call within 60s
-- TTFC ≤10s P95, TTFA ≤20s P95
-- Trial abuse controls working
-- 5+ positive responses from HVAC outreach
+- ✅ Visitor can sign up → build personalized agent → receive call within 60s
+- ✅ TTFC ≤10s P95 (Time to First Call)
+- ✅ TTFA ≤20s P95 (Time to First Agent Ready)
+- ✅ Trial abuse controls working (email normalization, IP throttling)
+- ✅ Mobile-responsive UI at 375px
+- ✅ Vapi assistant creation with OpenAI knowledge base
+- ✅ Recurring trial cleanup job (daily reaper)
+- 📋 Pre-launch validation: 5+ positive HVAC responses (R1-E02-T015)
 
 ---
 
@@ -255,67 +261,372 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 ## Quick Start
 
+### Prerequisites
+
 ```bash
-# Clone and setup
+# Required software
+ruby 3.3.6 (install via rbenv or asdf)
+postgresql 15+
+redis 7+
+node 18+ (for Tailwind/esbuild)
+```
+
+### Initial Setup
+
+```bash
+# 1. Clone and install dependencies
 git clone <repo-url>
 cd beaker-ai
-bin/setup
+bin/setup  # Installs gems, creates databases, runs migrations
 
-# Start development server
+# 2. Configure environment variables
+cp .env.example .env
+# Edit .env and add your API keys (see Environment Variables section below)
+
+# 3. Ensure Redis is running
+brew services start redis  # macOS
+# OR
+redis-server  # Linux/manual start
+
+# 4. Start all processes (web, worker, CSS, JS)
 bin/dev
+```
 
-# Run tests
-bundle exec rspec
+The app will be available at `http://localhost:3000`
 
-# Check code quality
-bundle exec rubocop
+### Running the Trial Flow (Phase 1)
+
+**1. Visit the Landing Page**
+```
+http://localhost:3000
+```
+
+**2. Sign Up for Trial**
+- Enter your email address
+- Fill in the trial form:
+  - Industry: HVAC (currently only option)
+  - Business name: e.g., "Smith HVAC"
+  - Your phone number: e.g., "+15551234567"
+- Submit form
+
+**3. Watch the Magic Happen**
+- Assistant is created in background (10-20 seconds)
+- Knowledge base generated via OpenAI
+- Page auto-refreshes when ready
+- Click "Call Me Now" to test your AI agent
+
+**4. Monitor the Process**
+```bash
+# Watch Sidekiq process jobs in terminal
+# OR visit Sidekiq Web UI (requires admin user)
+http://localhost:3000/sidekiq
+
+# Watch logs
+tail -f log/development.log
 ```
 
 ### Testing Magic-Link Authentication
 
 The app uses passwordless magic-link authentication (no passwords required):
 
+**Development (Letter Opener):**
 1. Visit `http://localhost:3000/users/sign_in`
 2. Enter an email address
-3. Check magic link email at `http://localhost:3000/letter_opener` (in development)
-4. Click "Log in to my account" link
-5. You're now authenticated!
+3. Click "Send me a login link"
+4. Check magic link at `http://localhost:3000/letter_opener` (auto-opens)
+5. Click "Log in to my account" link
+6. You're authenticated! ✅
 
-**Note:** Magic links expire after 20 minutes for security.
+**Production:**
+- Magic links sent via SendGrid to real email addresses
+- Links expire after 20 minutes for security
+
+### Creating an Admin User
+
+Admin users can access the Sidekiq Web UI and manage jobs:
+
+```bash
+# Open Rails console
+rails console
+
+# Create or update a user as admin
+user = User.find_by(email: 'your@email.com')
+user.update(admin: true)
+
+# Now you can access http://localhost:3000/sidekiq
+```
+
+### Running Tests
+
+```bash
+# Run full test suite (374 specs, ~15 seconds)
+bundle exec rspec
+
+# Run specific test file
+bundle exec rspec spec/models/trial_spec.rb
+
+# Run with coverage report
+COVERAGE=true bundle exec rspec
+open coverage/index.html
+
+# Run linters
+bundle exec rubocop
+bundle exec brakeman  # Security scanner
+```
+
+### Monitoring Background Jobs
+
+**Sidekiq Web UI** (requires admin user):
+```
+http://localhost:3000/sidekiq
+```
+
+Features:
+- **Dashboard** - Real-time job stats, queue depths
+- **Busy** - Currently processing jobs
+- **Queues** - View critical/default/low queues
+- **Retries** - Failed jobs waiting for retry
+- **Dead** - Jobs that exhausted retries
+- **Cron** - Recurring jobs (TrialReaperJob runs daily)
+
+**Terminal Monitoring:**
+```bash
+# Watch Sidekiq logs
+tail -f log/development.log | grep Sidekiq
+
+# Check Redis
+redis-cli
+> KEYS sidekiq:*
+> LLEN sidekiq:queue:default
+```
 
 ## Environment Variables Required
 
-See `.env.example` for full list. Key variables:
+Copy `.env.example` to `.env` and configure:
 
-- `DATABASE_URL` - PostgreSQL connection
-- `VAPI_API_KEY` - Vapi.ai API key
-- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` - Twilio credentials
-- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe keys
-- `SENDGRID_API_KEY` - Email delivery
-- `SENTRY_DSN` - Error tracking
+### Phase 0-1 Required Variables
 
-**Circuit Breaker API Clients:**
-- `VAPI_API_KEY` - Vapi.ai voice AI API
-- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` - Twilio telephony services
-- `STRIPE_SECRET_KEY` - Stripe payment processing
-- `TWILIO_STATUS_CALLBACK_URL`, `TWILIO_VOICE_URL` - Webhook endpoints
-- `STRIPE_SUCCESS_URL`, `STRIPE_CANCEL_URL` - Payment redirect URLs
+**Database & Redis:**
+```bash
+DATABASE_URL=postgresql://localhost/beaker_ai_development
+REDIS_URL=redis://localhost:6379/1
+```
 
-See [Environment Variables Documentation](./docs/environment-variables.md) for complete API client configuration.
+**Application:**
+```bash
+APP_HOST=localhost:3000
+RAILS_ENV=development
+SECRET_KEY_BASE=<generate via 'rails secret'>
+```
+
+**Voice AI (Vapi.ai):**
+```bash
+VAPI_API_KEY=your_vapi_key_here
+VAPI_WEBHOOK_SECRET=your_vapi_webhook_secret
+```
+
+**OpenAI (for knowledge base generation):**
+```bash
+OPENAI_API_KEY=your_openai_key_here
+```
+
+**Telephony (Twilio):**
+```bash
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_PHONE_NUMBER=+1234567890  # Your Twilio number for outbound
+```
+
+**Email (SendGrid):**
+```bash
+SENDGRID_API_KEY=your_sendgrid_key
+```
+
+**Monitoring:**
+```bash
+SENTRY_DSN=your_sentry_dsn  # Optional but recommended
+```
+
+### Phase 3+ Variables (Future)
+
+**Stripe (Payments):**
+```bash
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+**Webhook Callbacks:**
+```bash
+TWILIO_STATUS_CALLBACK_URL=https://your-app.com/webhooks/twilio
+VAPI_WEBHOOK_URL=https://your-app.com/webhooks/vapi
+STRIPE_SUCCESS_URL=https://your-app.com/checkout/success
+STRIPE_CANCEL_URL=https://your-app.com/checkout/cancel
+```
+
+See [Environment Variables Documentation](./docs/environment-variables.md) for complete details.
 
 ## Key Metrics & Success Criteria
 
-- **TTFC (Time to First Call):** ≤10s P95
-- **TTFA (Time to First Agent):** ≤20s P95
-- **Trial → Paid Conversion:** >15%
-- **Week 1 Success Rate:** >40%
-- **Trial Call Success Rate:** >85%
+### Phase 0-1 (Current)
+- **TTFC (Time to First Call):** ≤10s P95 ✅
+- **TTFA (Time to First Agent Ready):** ≤20s P95 ✅
+- **Test Coverage:** >90% (currently 94.4%) ✅
+- **Trial Call Success Rate:** >85% (target)
+- **Mobile Responsive:** Works at 375px ✅
+
+### Phase 2+ (Future)
+- **Trial → Paid Conversion:** >15% (target)
+- **Week 1 Success Rate:** >40% (target)
+- **Mini-Report Load Time:** <3s P95
+- **Dashboard Load Time:** <500ms with 50 calls
+
+## Project Structure
+
+```
+app/
+├── components/         # ViewComponents (Button, Input, Card, Toast)
+│   └── primitives/     # Reusable UI primitives
+├── controllers/        # Rails controllers (trials, signups, webhooks)
+├── jobs/              # Sidekiq jobs (CreateTrialAssistantJob, TrialReaperJob)
+├── models/            # ActiveRecord models (User, Trial, Call, Business)
+├── services/          # Business logic (VapiClient, PromptBuilder, KbGenerator)
+└── views/             # ERB templates
+
+config/
+├── sidekiq.yml        # Sidekiq queue configuration
+├── schedule.yml       # Sidekiq-Cron recurring jobs
+└── initializers/
+    ├── sidekiq.rb     # Sidekiq + Redis setup
+    ├── stoplight.rb   # Circuit breakers for API clients
+    └── rack_attack.rb # Rate limiting
+
+docs/
+├── start.md                  # Complete product + technical spec
+├── ticket-breakdown.md       # Detailed ticket breakdowns
+├── BUILD-GUIDE.md           # Architecture decisions + patterns
+├── completed_tickets/       # Implementation details for each ticket
+└── SIDEKIQ-MIGRATION.md    # Sidekiq migration documentation
+```
+
+## Common Development Tasks
+
+### Create a New Trial (Rails Console)
+
+```ruby
+rails console
+
+# Create user
+user = User.create!(email: 'test@example.com')
+
+# Create trial
+trial = user.trials.create!(
+  industry: 'hvac',
+  business_name: 'Test HVAC',
+  scenario: 'lead_intake',
+  phone_e164: '+15551234567'
+)
+
+# Trigger assistant creation
+CreateTrialAssistantJob.perform_now(trial.id)
+
+# Check status
+trial.reload.status  # => "active"
+trial.vapi_assistant_id  # => "asst_abc123..."
+```
+
+### Manually Trigger a Trial Call
+
+```ruby
+rails console
+
+trial = Trial.find_by(code: 'ABC123')
+StartTrialCallJob.perform_now(trial.id, trial.phone_e164)
+```
+
+### View Sidekiq Job Status
+
+```ruby
+rails console
+
+# Check queue depths
+Sidekiq::Stats.new.queues
+# => {"critical"=>0, "default"=>2, "low"=>0}
+
+# View scheduled jobs
+Sidekiq::ScheduledSet.new.each { |job| puts job.display_class }
+
+# View retries
+Sidekiq::RetrySet.new.size
+```
+
+### Run Background Jobs Inline (Testing)
+
+```ruby
+# In test environment, use Sidekiq testing mode
+Sidekiq::Testing.inline! do
+  CreateTrialAssistantJob.perform_later(trial.id)
+  # Job executes immediately, synchronously
+end
+```
+
+## Troubleshooting
+
+### Sidekiq Not Processing Jobs
+
+```bash
+# Check if Redis is running
+redis-cli ping
+# Should return: PONG
+
+# Check Sidekiq worker logs
+tail -f log/development.log | grep Sidekiq
+
+# Restart Sidekiq worker
+# Stop bin/dev and restart, or manually:
+bundle exec sidekiq -C config/sidekiq.yml
+```
+
+### Magic Links Not Sending
+
+```bash
+# Development: Check Letter Opener
+open http://localhost:3000/letter_opener
+
+# Production: Check SendGrid dashboard
+# Verify SENDGRID_API_KEY is set
+```
+
+### Vapi Assistant Creation Failing
+
+```bash
+# Check API key
+rails console
+VapiClient.new.create_assistant(...)
+# Should not raise authentication error
+
+# Check circuit breaker status
+Stoplight('vapi:create_assistant').color
+# => :green (working) or :red (circuit open)
+```
+
+### Database Connection Issues
+
+```bash
+# Check PostgreSQL is running
+psql -d beaker_ai_development -c "SELECT 1"
+
+# Recreate databases
+rails db:drop db:create db:migrate db:seed
+```
 
 ## Documentation
 
-- **start.md** - Complete product + technical specification
-- **ticket-breakdown.md** - Detailed ticket breakdowns with implementation hints
-- **BUILD-GUIDE.md** - Architecture decisions + patterns
+- **[start.md](./docs/start.md)** - Complete product + technical specification
+- **[ticket-breakdown.md](./docs/ticket-breakdown.md)** - Detailed ticket breakdowns with implementation hints
+- **[BUILD-GUIDE.md](./docs/BUILD-GUIDE.md)** - Architecture decisions + patterns
+- **[completed_tickets/](./docs/completed_tickets/)** - Implementation details for each completed ticket
+- **[SIDEKIQ-MIGRATION.md](./SIDEKIQ-MIGRATION-SUMMARY.md)** - Background job system migration documentation
 
 ## License
 
