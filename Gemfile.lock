@@ -493,6 +493,9 @@ GEM
     useragent (0.16.11)
     vcr (6.3.1)
       base64
+    view_component (4.1.0)
+      activesupport (>= 7.1.0, < 8.2)
+      concurrent-ruby (~> 1)
     warden (1.2.9)
       rack (>= 2.0.9)
     web-console (4.2.1)
@@ -572,6 +575,7 @@ DEPENDENCIES
   twilio-ruby (~> 7.0)
   tzinfo-data
   vcr
+  view_component (>= 3.19.0)
   web-console
   webmock
 

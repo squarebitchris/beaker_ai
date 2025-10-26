@@ -1,0 +1,45 @@
+<div class="space-y-8 p-8">
+  <div class="space-y-4 max-w-md">
+    <h3 class="text-lg font-semibold mb-4">Toast Variants</h3>
+    
+    <%= render Primitives::ToastComponent.new(
+      variant: :default,
+      title: "Scheduled: Catch up",
+      message: "Friday, February 10, 2023 at 5:57 PM",
+      auto_dismiss: false
+    ) %>
+    
+    <%= render Primitives::ToastComponent.new(
+      variant: :success,
+      title: "Success",
+      message: "Your account has been created successfully",
+      auto_dismiss: false
+    ) %>
+    
+    <%= render Primitives::ToastComponent.new(
+      variant: :error,
+      title: "Error",
+      message: "Something went wrong. Please try again.",
+      auto_dismiss: false
+    ) %>
+    
+    <%= render Primitives::ToastComponent.new(
+      variant: :warning,
+      title: "Warning",
+      message: "Your trial expires in 3 days",
+      auto_dismiss: false
+    ) %>
+  </div>
+
+  <div class="mt-8">
+    <h3 class="text-lg font-semibold mb-4">Non-dismissible Toast</h3>
+    <%= render Primitives::ToastComponent.new(
+      variant: :default,
+      title: "Processing",
+      message: "Please wait while we process your request...",
+      dismissible: false,
+      auto_dismiss: false
+    ) %>
+  </div>
+</div>
+

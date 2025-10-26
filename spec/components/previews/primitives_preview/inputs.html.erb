@@ -1,0 +1,56 @@
+<div class="space-y-8 p-8 max-w-md">
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Basic Input</h3>
+    <%= render Primitives::InputComponent.new(
+      name: "email",
+      type: "email",
+      label: "Email Address",
+      placeholder: "name@example.com"
+    ) %>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Required Input with Helper Text</h3>
+    <%= render Primitives::InputComponent.new(
+      name: "username",
+      label: "Username",
+      helper_text: "This will be your public display name",
+      placeholder: "johndoe",
+      required: true
+    ) %>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Input with Error</h3>
+    <%= render Primitives::InputComponent.new(
+      name: "password",
+      type: "password",
+      label: "Password",
+      value: "123",
+      error: "Password must be at least 8 characters",
+      required: true
+    ) %>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Phone Input</h3>
+    <%= render Primitives::InputComponent.new(
+      name: "phone",
+      type: "tel",
+      label: "Phone Number",
+      placeholder: "+1 (555) 123-4567",
+      helper_text: "We'll use this for call notifications"
+    ) %>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Disabled Input</h3>
+    <%= render Primitives::InputComponent.new(
+      name: "disabled_field",
+      label: "Disabled Field",
+      value: "Cannot edit this",
+      disabled: true
+    ) %>
+  </div>
+</div>
+

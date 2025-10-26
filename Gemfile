@@ -49,6 +49,9 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 
+# Component-based UI architecture
+gem "view_component", ">= 3.19.0"
+
 # Circuit breaker for external API calls
 gem "stoplight", "~> 4.0"
 

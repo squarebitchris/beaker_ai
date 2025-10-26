@@ -1,0 +1,49 @@
+<div class="space-y-8 p-8">
+  <div class="max-w-md">
+    <h3 class="text-lg font-semibold mb-4">Simple Card</h3>
+    <%= render Primitives::CardComponent.new do %>
+      <p class="text-sm">This is a simple card with just content.</p>
+    <% end %>
+  </div>
+
+  <div class="max-w-md">
+    <h3 class="text-lg font-semibold mb-4">Card with Title and Description</h3>
+    <%= render Primitives::CardComponent.new do |card| %>
+      <% card.with_title { "Create Account" } %>
+      <% card.with_description { "Enter your information to get started" } %>
+      
+      <div class="space-y-4 mt-4">
+        <%= render Primitives::InputComponent.new(
+          name: "name",
+          label: "Full Name",
+          placeholder: "John Doe"
+        ) %>
+        
+        <%= render Primitives::InputComponent.new(
+          name: "email",
+          type: "email",
+          label: "Email",
+          placeholder: "john@example.com"
+        ) %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="max-w-md">
+    <h3 class="text-lg font-semibold mb-4">Card with Footer</h3>
+    <%= render Primitives::CardComponent.new do |card| %>
+      <% card.with_title { "Subscription Plan" } %>
+      <% card.with_description { "Manage your subscription" } %>
+      
+      <p class="text-2xl font-bold mt-4">$199<span class="text-sm font-normal text-muted-foreground">/month</span></p>
+      
+      <% card.with_footer do %>
+        <div class="flex gap-2 w-full">
+          <%= render Primitives::ButtonComponent.new(class: "flex-1") { "Upgrade" } %>
+          <%= render Primitives::ButtonComponent.new(variant: :outline, class: "flex-1") { "Cancel" } %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+

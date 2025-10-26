@@ -1,0 +1,49 @@
+<div class="space-y-8 p-8">
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Default Variant</h3>
+    <div class="flex flex-wrap gap-4">
+      <%= render Primitives::ButtonComponent.new { "Default" } %>
+      <%= render Primitives::ButtonComponent.new(size: :sm) { "Small" } %>
+      <%= render Primitives::ButtonComponent.new(size: :lg) { "Large" } %>
+      <%= render Primitives::ButtonComponent.new(disabled: true) { "Disabled" } %>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Destructive Variant</h3>
+    <div class="flex flex-wrap gap-4">
+      <%= render Primitives::ButtonComponent.new(variant: :destructive) { "Delete" } %>
+      <%= render Primitives::ButtonComponent.new(variant: :destructive, size: :sm) { "Remove" } %>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Outline Variant</h3>
+    <div class="flex flex-wrap gap-4">
+      <%= render Primitives::ButtonComponent.new(variant: :outline) { "Outline" } %>
+      <%= render Primitives::ButtonComponent.new(variant: :outline, size: :lg) { "Large Outline" } %>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Secondary Variant</h3>
+    <div class="flex flex-wrap gap-4">
+      <%= render Primitives::ButtonComponent.new(variant: :secondary) { "Secondary" } %>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Ghost Variant</h3>
+    <div class="flex flex-wrap gap-4">
+      <%= render Primitives::ButtonComponent.new(variant: :ghost) { "Ghost" } %>
+    </div>
+  </div>
+
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Link Variant</h3>
+    <div class="flex flex-wrap gap-4">
+      <%= render Primitives::ButtonComponent.new(variant: :link) { "Link Button" } %>
+    </div>
+  </div>
+</div>
+

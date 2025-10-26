@@ -1,0 +1,11 @@
+<div class="space-y-8 p-8">
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Loading States</h3>
+    <div class="flex flex-wrap gap-4">
+      <%= render Primitives::ButtonComponent.new(loading: true) %>
+      <%= render Primitives::ButtonComponent.new(loading: true, variant: :destructive) %>
+      <%= render Primitives::ButtonComponent.new(loading: true, variant: :outline) %>
+    </div>
+  </div>
+</div>
+

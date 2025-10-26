@@ -1,0 +1,32 @@
+<div class="<%= card_classes %>" <%= tag.attributes(html_options.except(:class)) %>>
+  <% if header %>
+    <div class="flex flex-col space-y-1.5 p-6">
+      <%= header %>
+    </div>
+  <% elsif title || description %>
+    <div class="flex flex-col space-y-1.5 p-6">
+      <% if title %>
+        <h3 class="text-2xl font-semibold leading-none tracking-tight">
+          <%= title %>
+        </h3>
+      <% end %>
+      
+      <% if description %>
+        <p class="text-sm text-muted-foreground">
+          <%= description %>
+        </p>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <div class="p-6 pt-0">
+    <%= content %>
+  </div>
+  
+  <% if footer %>
+    <div class="flex items-center p-6 pt-0">
+      <%= footer %>
+    </div>
+  <% end %>
+</div>
+

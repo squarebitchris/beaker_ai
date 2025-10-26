@@ -1,0 +1,39 @@
+<div class="<%= toast_classes %>" <%= tag.attributes(html_options.except(:class).merge(controller_attrs)) %>>
+  <div class="flex gap-3 items-start flex-1">
+    <% if icon_name %>
+      <div class="flex-shrink-0 pt-0.5">
+        <%= render_icon(icon_name) %>
+      </div>
+    <% end %>
+    
+    <div class="grid gap-1 flex-1">
+      <% if title %>
+        <div class="text-sm font-semibold">
+          <%= title %>
+        </div>
+      <% end %>
+      
+      <% if message %>
+        <div class="text-sm opacity-90">
+          <%= message %>
+        </div>
+      <% end %>
+      
+      <%= content if content? %>
+    </div>
+  </div>
+  
+  <% if dismissible %>
+    <button
+      type="button"
+      class="absolute top-2 right-2 rounded-radius-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600"
+      data-action="click->toast#dismiss"
+      aria-label="Close"
+    >
+      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  <% end %>
+</div>
+

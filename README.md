@@ -48,7 +48,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R1-E01-T009** - Configure Rack::Attack for rate limiting (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T009.md)
 - [x] **R1-E01-T010** - Set up GitHub Actions CI pipeline (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T010.md)
 - [x] **R1-E01-T011** - Deploy to staging (Fly.io/Render/Heroku) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T011.md)
-- [ ] **R1-E01-T012** - Create design system foundation (tokens, components) (3 pts)
+- [x] **R1-E01-T012** - Create design system foundation (tokens, components) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T012.md)
 
 **Exit Criteria:**
 - ✅ Rails app boots locally with Postgres + SolidQueue

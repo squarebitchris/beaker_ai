@@ -21,14 +21,29 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+    
+    <%# Prevent flash of wrong theme on page load %>
+    <script>
+      (function() {
+        const theme = localStorage.getItem('beaker-theme') || 
+                     (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
 
-  <body>
+  <body data-controller="theme" class="bg-background text-foreground">
     <% if notice %>
-      <p class="notice"><%= notice %></p>
+      <div class="p-4 bg-card border-b border-border">
+        <p class="text-sm text-foreground"><%= notice %></p>
+      </div>
     <% end %>
     <% if alert %>
-      <p class="alert"><%= alert %></p>
+      <div class="p-4 bg-destructive text-destructive-foreground border-b border-destructive">
+        <p class="text-sm"><%= alert %></p>
+      </div>
     <% end %>
     
     <%= yield %>

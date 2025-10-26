@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Component Preview - Beaker AI</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+  </head>
+
+  <body data-controller="theme" class="bg-background">
+    <div class="border-b border-border bg-card">
+      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-foreground">Beaker AI Design System</h1>
+          <p class="text-sm text-muted-foreground">Component Preview</p>
+        </div>
+        
+        <button
+          type="button"
+          data-action="click->theme#toggle"
+          class="inline-flex items-center justify-center rounded-radius-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-10"
+          aria-label="Toggle theme"
+        >
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <main class="min-h-screen">
+      <%= yield %>
+    </main>
+  </body>
+</html>
+
