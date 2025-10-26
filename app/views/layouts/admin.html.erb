@@ -29,6 +29,11 @@
                 <% end %>
               </li>
               <li>
+                <%= link_to admin_search_path, class: "block px-4 py-2 rounded hover:bg-gray-800 #{'bg-gray-800' if request.path.include?('/search')}" do %>
+                  Search
+                <% end %>
+              </li>
+              <li>
                 <%= link_to admin_businesses_path, class: "block px-4 py-2 rounded hover:bg-gray-800 #{'bg-gray-800' if request.path.include?('/businesses')}" do %>
                   Businesses
                 <% end %>

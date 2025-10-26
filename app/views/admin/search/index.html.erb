@@ -1,0 +1,106 @@
+<div class="max-w-6xl mx-auto">
+  <h1 class="text-3xl font-bold mb-6">Search</h1>
+  
+  <%= form_with url: admin_search_path, method: :get, local: true, class: "mb-8" do |f| %>
+    <div class="flex gap-2">
+      <%= f.text_field :q, 
+          value: params[:q], 
+          placeholder: "Search by email, phone, name, or ID...",
+          class: "flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500",
+          autofocus: true %>
+      <%= f.submit "Search", class: "px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" %>
+    </div>
+  <% end %>
+  
+  <% if params[:q].present? %>
+    <div class="grid gap-6">
+      <!-- Businesses Results -->
+      <% if @results[:businesses].any? %>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Businesses (<%= @results[:businesses].count %>)</h2>
+          <div class="space-y-3">
+            <% @results[:businesses].each do |business| %>
+              <%= link_to admin_business_path(business), class: "block p-3 border rounded hover:bg-gray-50" do %>
+                <div class="font-medium"><%= business.name %></div>
+                <div class="text-sm text-gray-500">Stripe: <%= business.stripe_customer_id %></div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Users Results -->
+      <% if @results[:users].any? %>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Users (<%= @results[:users].count %>)</h2>
+          <div class="space-y-3">
+            <% @results[:users].each do |user| %>
+              <%= link_to admin_user_path(user), class: "block p-3 border rounded hover:bg-gray-50" do %>
+                <div class="font-medium"><%= mask_email(user.email) %></div>
+                <div class="text-sm text-gray-500">ID: <%= user.id %></div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Trials Results -->
+      <% if @results[:trials].any? %>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Trials (<%= @results[:trials].count %>)</h2>
+          <div class="space-y-3">
+            <% @results[:trials].each do |trial| %>
+              <div class="p-3 border rounded">
+                <div class="font-medium"><%= trial.business_name %></div>
+                <div class="text-sm text-gray-500">
+                  Phone: <%= mask_phone(trial.phone_e164) %>
+                  <span class="ml-4">Status: <%= trial.status %></span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Calls Results -->
+      <% if @results[:calls].any? %>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Calls (<%= @results[:calls].count %>)</h2>
+          <div class="space-y-3">
+            <% @results[:calls].each do |call| %>
+              <div class="p-3 border rounded">
+                <div class="font-medium">
+                  <%= mask_phone(call.to_e164) %>
+                  <% if call.from_e164.present? %>
+                    <span class="mx-2">→</span>
+                    <%= mask_phone(call.from_e164) %>
+                  <% end %>
+                </div>
+                <div class="text-sm text-gray-500">
+                  Status: <%= call.status %>
+                  <span class="ml-4"><%= time_ago_in_words(call.created_at) %> ago</span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Leads Placeholder -->
+      <% if false && @results[:leads].present? %>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold mb-4">Leads (<%= @results[:leads].count %>)</h2>
+          <div class="text-gray-500">Lead search will be available in Phase 5</div>
+        </div>
+      <% end %>
+      
+      <!-- No Results -->
+      <% if @results.values.all?(&:empty?) %>
+        <div class="text-center py-12 text-gray-500">
+          No results found for "<%= params[:q] %>"
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
