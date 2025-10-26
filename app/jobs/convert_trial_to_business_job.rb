@@ -49,7 +49,14 @@ class ConvertTrialToBusinessJob < ApplicationJob
       Rails.logger.info("[ConvertTrialToBusinessJob] Created business #{business.id} for trial #{trial_id}")
 
       # 6. Send "Agent Ready" email
-      BusinessMailer.agent_ready(business.id).deliver_later
+      begin
+        BusinessMailer.agent_ready(business.id).deliver_later
+        Rails.logger.info("[ConvertTrialToBusinessJob] Agent ready email queued for business #{business.id}")
+      rescue => e
+        # Don't fail the job if email fails, but track it
+        Sentry.capture_exception(e, extra: { business_id: business.id, user_email: user.email })
+        Rails.logger.error("[ConvertTrialToBusinessJob] Failed to queue agent ready email: #{e.message}")
+      end
 
       business
     end

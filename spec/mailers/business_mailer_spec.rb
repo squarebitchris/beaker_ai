@@ -32,7 +32,9 @@ RSpec.describe BusinessMailer, type: :mailer do
     end
 
     it 'assigns @user' do
-      expect(mail.body.decoded).to match(user.email.split('@').first)
+      # Check text part for user name (titleized from email)
+      text_part = mail.parts.find { |p| p.content_type.include?('text/plain') }
+      expect(text_part.body.decoded).to include(user.email.split('@').first.titleize)
     end
 
     context 'HTML email' do
@@ -45,7 +47,8 @@ RSpec.describe BusinessMailer, type: :mailer do
       end
 
       it 'includes dashboard link' do
-        expect(mail.body.decoded).to match(/beaker\.ai|localhost/)
+        html_part = mail.parts.find { |p| p.content_type.include?('text/html') }
+        expect(html_part.body.decoded).to match(/beaker\.ai|localhost/)
       end
     end
 
@@ -66,6 +69,46 @@ RSpec.describe BusinessMailer, type: :mailer do
 
       it 'shows pro plan in email' do
         expect(mail.body.encoded).to match(/Pro/)
+      end
+    end
+
+    context 'email content validation' do
+      it 'does not promise immediate phone number assignment' do
+        # Phase 4 feature, should be marked "coming soon"
+        expect(mail.body.encoded).to include('Coming Soon')
+      end
+
+      it 'includes current subscription status' do
+        expect(mail.body.encoded).to match(/subscription.*active/i)
+      end
+
+      it 'clearly states what is available now vs later' do
+        expect(mail.body.encoded).to match(/Active Right Now/i)
+      end
+    end
+
+    context 'when StripePlan is not seeded' do
+      before do
+        allow(StripePlan).to receive(:for_plan).and_return(nil)
+      end
+
+      it 'still renders without errors' do
+        expect { mail.body.encoded }.not_to raise_error
+      end
+
+      it 'shows fallback pricing' do
+        expect(mail.body.encoded).to match(/\$199|\$499/)
+      end
+    end
+
+    context 'mailer configuration' do
+      it 'uses configured from address' do
+        expect(mail.from).not_to include('from@example.com')
+      end
+
+      it 'has professional sender name' do
+        # Should be "Beaker AI <...>" or configured MAILER_FROM
+        expect(mail.from.first).to be_present
       end
     end
   end

@@ -7,16 +7,29 @@ Congratulations! Your subscription to the <%= @business.plan.titleize %> Plan is
 AGENT DETAILS
 
 Business: <%= @business.name %>
-Plan: <%= @business.plan.titleize %> ($<%= StripePlan.for_plan(@business.plan)&.base_price_dollars || '199' %>/month)
+Plan: <%= @business.plan.titleize %> 
+<% if stripe_plan = StripePlan.for_plan(@business.plan) %>
+  ($<%= number_to_currency(stripe_plan.base_price_dollars, precision: 0) %>/month)
+<% else %>
+  ($<%= @business.plan == 'pro' ? '499' : '199' %>/month)
+<% end %>
 Calls Included: <%= @business.calls_included %> per month
 
-WHAT'S NEXT?
+YOUR AI AGENT IS LIVE!
 
-Step 1: We're in the process of assigning you a dedicated phone number for your AI agent.
+✅ Active Right Now: Your unlimited AI assistant is ready. No time caps, no trial limits.
 
-Step 2: You'll receive an email when your number is ready, along with instructions on how to start receiving leads.
+📋 Current Status: Your subscription is active and billing has started. You have <%= @business.calls_included %> calls included this month.
 
-Step 3: Your AI agent will begin answering calls immediately, capturing lead information and scheduling follow-ups.
+COMING SOON
+
+🚀 Phase 4 (Next 2 weeks):
+- Dedicated phone number assignment
+- Inbound call handling
+- Lead capture dashboard
+- Real-time call analytics
+
+We'll email you as soon as these features are ready for your account.
 
 [ View Your Dashboard ]
 <%= ENV.fetch('APP_URL', 'https://beaker.ai') %>/businesses

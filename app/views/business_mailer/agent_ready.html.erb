@@ -22,7 +22,12 @@
           <strong>Business:</strong> <%= @business.name %>
         </div>
         <div style="margin: 16px 0;">
-          <strong>Plan:</strong> <%= @business.plan.titleize %> ($<%= StripePlan.for_plan(@business.plan)&.base_price_dollars || '199' %>/month)
+          <strong>Plan:</strong> <%= @business.plan.titleize %> 
+          <% if stripe_plan = StripePlan.for_plan(@business.plan) %>
+            ($<%= number_to_currency(stripe_plan.base_price_dollars, precision: 0) %>/month)
+          <% else %>
+            ($<%= @business.plan == 'pro' ? '499' : '199' %>/month)
+          <% end %>
         </div>
         <div style="margin: 16px 0;">
           <strong>Calls Included:</strong> <%= @business.calls_included %> per month
@@ -30,15 +35,28 @@
       </div>
       
       <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 24px 0; border-radius: 4px;">
-        <h3 style="margin-top: 0; color: #d97706; font-size: 18px;">🎯 What's Next?</h3>
+        <h3 style="margin-top: 0; color: #d97706; font-size: 18px;">🎯 Your AI Agent is Live!</h3>
         <p style="margin-bottom: 8px; color: #92400e;">
-          <strong>Step 1:</strong> We're in the process of assigning you a dedicated phone number for your AI agent.
+          <strong>✅ Active Right Now:</strong> Your unlimited AI assistant is ready. No time caps, no trial limits.
         </p>
         <p style="margin-bottom: 8px; color: #92400e;">
-          <strong>Step 2:</strong> You'll receive an email when your number is ready, along with instructions on how to start receiving leads.
+          <strong>📋 Current Status:</strong> Your subscription is active and billing has started. You have <%= @business.calls_included %> calls included this month.
         </p>
-        <p style="margin-bottom: 0; color: #92400e;">
-          <strong>Step 3:</strong> Your AI agent will begin answering calls immediately, capturing lead information and scheduling follow-ups.
+      </div>
+      
+      <div style="background: #e0e7ff; border-left: 4px solid #667eea; padding: 16px; margin: 24px 0; border-radius: 4px;">
+        <h3 style="margin-top: 0; color: #4338ca; font-size: 18px;">🚀 Coming Soon</h3>
+        <p style="margin-bottom: 8px; color: #3730a3; font-size: 14px;">
+          <strong>Phase 4 (Next 2 weeks):</strong>
+        </p>
+        <ul style="margin: 0; padding-left: 20px; color: #3730a3;">
+          <li style="margin-bottom: 8px;">Dedicated phone number assignment</li>
+          <li style="margin-bottom: 8px;">Inbound call handling</li>
+          <li style="margin-bottom: 8px;">Lead capture dashboard</li>
+          <li>Real-time call analytics</li>
+        </ul>
+        <p style="margin-top: 12px; margin-bottom: 0; color: #3730a3; font-size: 14px;">
+          We'll email you as soon as these features are ready for your account.
         </p>
       </div>
       
