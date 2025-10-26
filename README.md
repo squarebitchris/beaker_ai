@@ -144,7 +144,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R2-E04-T008** - Onboarding page shell (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T008.md)
 - [x] **R2-E04-T009** - "Agent Ready" email template (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T009.md)
 - [x] **R2-E04-T010** - Idempotency testing (prevent duplicate businesses) (3 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T010.md)
-- [ ] **R2-E04-T011** - Upgrade button in trial UI (2 pts)
+- [x] **R2-E04-T011** - Upgrade button in trial UI (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T011.md)
 - [ ] **R2-E04-T012** - Stripe Tax configuration (2 pts)
 
 **Exit Criteria:**

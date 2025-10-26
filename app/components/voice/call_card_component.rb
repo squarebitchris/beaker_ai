@@ -4,12 +4,21 @@ module Voice
   class CallCardComponent < ViewComponent::Base
     attr_reader :call_record
 
-    def initialize(call:, show_audio: true)
-      @call_record = call
-      @show_audio = show_audio
-    end
+  def initialize(call:, show_audio: true)
+    @call_record = call
+    @show_audio = show_audio
+  end
 
-    def captured_fields
+  def trial_id
+    return nil unless call_record.callable_type == "Trial"
+    call_record.callable_id
+  end
+
+  def show_upgrade_cta?
+    trial_id.present?
+  end
+
+  def captured_fields
       {
         "Name" => call_record.captured_name,
         "Phone" => call_record.captured_phone,

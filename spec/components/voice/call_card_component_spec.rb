@@ -126,14 +126,54 @@ RSpec.describe Voice::CallCardComponent, type: :component do
       expect(link['data-action']).to eq('click->analytics#trackUpgradeClick')
       expect(link['data-analytics-event-value']).to eq('trial_upgrade_cta_click')
       expect(link['data-analytics-call-id-value']).to eq(call.id.to_s)
-      expect(link['data-analytics-trial-id-value']).to eq(call.callable_id.to_s)
+      expect(link['data-analytics-trial-id-value']).to eq(trial.id.to_s)
     end
 
     it 'links to upgrade page with trial context' do
       render_inline(described_class.new(call: call))
 
       link = page.find('a', text: /Go Live/)
-      expect(link['href']).to eq("/upgrade/#{call.callable_id}")
+      expect(link['href']).to eq("/upgrade/#{trial.id}")
+    end
+  end
+
+  describe '#trial_id' do
+    context 'when call belongs to Trial' do
+      let(:trial) { create(:trial, :active) }
+      let(:call) { create(:call, :completed, callable: trial) }
+
+      it 'returns the trial id' do
+        component = described_class.new(call: call)
+        expect(component.trial_id).to eq(trial.id)
+      end
+    end
+
+    context 'when call belongs to Business' do
+      let(:business) { create(:business) }
+      let(:call) { create(:call, :completed, callable: business) }
+
+      it 'returns nil' do
+        component = described_class.new(call: call)
+        expect(component.trial_id).to be_nil
+      end
+    end
+  end
+
+  describe '#show_upgrade_cta?' do
+    it 'returns true for trial calls' do
+      trial = create(:trial, :active)
+      call = create(:call, :completed, callable: trial)
+      component = described_class.new(call: call)
+
+      expect(component.show_upgrade_cta?).to be true
+    end
+
+    it 'returns false for business calls' do
+      business = create(:business)
+      call = create(:call, :completed, callable: business)
+      component = described_class.new(call: call)
+
+      expect(component.show_upgrade_cta?).to be false
     end
   end
 
