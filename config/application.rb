@@ -31,5 +31,8 @@ module BeakerAi
 
     # Use SolidQueue as the Active Job backend
     config.active_job.queue_adapter = :solid_queue
+
+    # Enable Rack::Attack for rate limiting
+    config.middleware.use Rack::Attack
   end
 end

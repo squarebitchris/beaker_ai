@@ -52,6 +52,9 @@ gem "image_processing", "~> 1.2"
 # Circuit breaker for external API calls
 gem "stoplight", "~> 4.0"
 
+# Rate limiting and API protection
+gem "rack-attack", "~> 6.7"
+
 # HTTP client for API calls
 gem "httpx", "~> 1.6"
 
