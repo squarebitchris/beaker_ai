@@ -7,6 +7,7 @@ RSpec.describe VapiClient, vcr: false do
   before do
     # Set up environment variables for testing
     allow(ENV).to receive(:fetch).with('VAPI_API_KEY').and_return('test_api_key')
+    allow(ENV).to receive(:fetch).with('APP_URL', anything).and_return('http://localhost:3000')
 
     # Reset circuit breakers before each test
     reset_circuit_breakers
@@ -16,7 +17,39 @@ RSpec.describe VapiClient, vcr: false do
   end
 
   describe '#create_assistant' do
-    let(:config) { { name: 'Test Assistant', voice_id: 'rachel' } }
+    let(:config) do
+      {
+        name: 'Test Assistant',
+        system_prompt: 'You are a helpful assistant.',
+        first_message: 'Hi, how can I help?',
+        voice_id: 'rachel',
+        functions: [],
+        max_duration_seconds: 120,
+        metadata: { trial_id: 'trial_123' }
+      }
+    end
+
+    let(:expected_payload) do
+      {
+        name: 'Test Assistant',
+        model: {
+          provider: 'openai',
+          model: 'gpt-4o-mini',
+          temperature: 0.7,
+          systemPrompt: 'You are a helpful assistant.'
+        },
+        voice: {
+          provider: '11labs',
+          voiceId: 'rachel'
+        },
+        firstMessage: 'Hi, how can I help?',
+        functions: [],
+        maxDurationSeconds: 120,
+        silenceTimeoutSeconds: 30,
+        serverUrl: 'http://localhost:3000/webhooks/vapi',
+        metadata: { trial_id: 'trial_123' }
+      }
+    end
 
     context 'when API succeeds' do
       it 'returns assistant data' do
@@ -26,7 +59,7 @@ RSpec.describe VapiClient, vcr: false do
               'Authorization' => 'Bearer test_api_key',
               'Content-Type' => 'application/json'
             },
-            body: config.to_json
+            body: expected_payload.to_json
           )
           .to_return(
             status: 200,
@@ -37,6 +70,47 @@ RSpec.describe VapiClient, vcr: false do
 
         expect(result['id']).to eq('asst_123')
         expect(result['name']).to eq('Test Assistant')
+      end
+
+      it 'includes duration caps for trial abuse prevention' do
+        stub_request(:post, 'https://api.vapi.ai/assistant')
+          .with(
+            body: hash_including(
+              maxDurationSeconds: 120,
+              silenceTimeoutSeconds: 30
+            )
+          )
+          .to_return(status: 200, body: { id: 'asst_123' }.to_json)
+
+        client.create_assistant(config: config)
+      end
+
+      it 'includes webhook serverUrl' do
+        stub_request(:post, 'https://api.vapi.ai/assistant')
+          .with(
+            body: hash_including(
+              serverUrl: 'http://localhost:3000/webhooks/vapi'
+            )
+          )
+          .to_return(status: 200, body: { id: 'asst_123' }.to_json)
+
+        client.create_assistant(config: config)
+      end
+
+      it 'uses APP_URL env var when available' do
+        allow(ENV).to receive(:fetch).with('VAPI_API_KEY').and_return('test_api_key')
+        allow(ENV).to receive(:fetch).with('APP_URL', 'http://localhost:3000')
+          .and_return('https://my-app.herokuapp.com')
+
+        stub_request(:post, 'https://api.vapi.ai/assistant')
+          .with(
+            body: hash_including(
+              serverUrl: 'https://my-app.herokuapp.com/webhooks/vapi'
+            )
+          )
+          .to_return(status: 200, body: { id: 'asst_123' }.to_json)
+
+        client.create_assistant(config: config)
       end
     end
 

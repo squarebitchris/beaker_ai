@@ -9,7 +9,10 @@ class VapiClient < ApiClientBase
   def create_assistant(config:)
     with_circuit_breaker(name: "vapi:create_assistant") do
       with_retry(attempts: 3) do
-        response = make_request(:post, "/assistant", config)
+        # Build full Vapi API payload structure
+        payload = build_assistant_payload(config)
+
+        response = make_request(:post, "/assistant", payload)
 
         raise ApiError, "Vapi API error: #{response.code}" unless (200..299).include?(response.code.to_i)
 
@@ -72,6 +75,30 @@ class VapiClient < ApiClientBase
   end
 
   private
+
+  def build_assistant_payload(config)
+    {
+      name: config[:name],
+      model: {
+        provider: "openai",
+        model: config[:model] || "gpt-4o-mini",
+        temperature: config[:temperature] || 0.7,
+        systemPrompt: config[:system_prompt]
+      },
+      voice: {
+        provider: "11labs",
+        voiceId: config[:voice_id] || "rachel"
+      },
+      firstMessage: config[:first_message],
+      functions: config[:functions] || [],
+      maxDurationSeconds: config[:max_duration_seconds] || 120,
+      silenceTimeoutSeconds: config[:silence_timeout_seconds] || 30,
+      serverUrl: config[:server_url] || "#{ENV.fetch('APP_URL', 'http://localhost:3000')}/webhooks/vapi"
+    }.tap do |payload|
+      # Add optional metadata if provided
+      payload[:metadata] = config[:metadata] if config[:metadata]
+    end
+  end
 
   def make_request(method, path, payload = nil)
     uri = URI("#{@base_url}#{path}")

@@ -26,6 +26,13 @@ class Rack::Attack
     end
   end
 
+  # Rate limit trial creation (CRITICAL: prevent abuse and cost overruns)
+  throttle("trials/ip", limit: 3, period: 1.hour) do |req|
+    if req.path == "/trials" && req.post?
+      req.ip
+    end
+  end
+
   # Rate limit webhook endpoints (prevent abuse)
   # High limit since signature verification is primary defense
   throttle("webhooks", limit: 300, period: 1.minute) do |req|
@@ -44,6 +51,25 @@ class Rack::Attack
     # You can add IPs here manually or via admin interface
     # Rack::Attack::BlockList.add("bad_ips", "1.2.3.4")
     false # No automatic blocking for now
+  end
+
+  # Block disposable email domains (abuse prevention)
+  blocklist("block disposable emails") do |req|
+    if req.path == "/users/sign_in" && req.post?
+      email = req.params.dig("user", "email")
+      if email
+        disposable_domains = %w[
+          guerrillamail mailinator 10minutemail tempmail
+          throwaway trashmail fakeinbox yopmail
+          sharklasers maildrop getnada temp-mail
+        ]
+        email.match?(/\@(#{disposable_domains.join('|')})\./)
+      else
+        false
+      end
+    else
+      false
+    end
   end
 
   # Custom response for rate limited requests

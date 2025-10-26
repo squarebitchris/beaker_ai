@@ -44,22 +44,23 @@ RSpec.describe "Trial Form Mobile Layout", type: :system do
     it "shows validation errors properly" do
       visit new_trial_path
 
-      # Fill in some fields but leave others empty to trigger validation
+      # Fill in most fields but leave business_name empty to trigger validation
       select "Hvac", from: "Industry"
-      # Leave business_name, scenario, and phone_e164 empty
+      select "Lead Intake", from: "Call Type"
+      fill_in "Your Phone Number", with: "+12125551234"
+      # Leave business_name empty
+
+      # Remove HTML5 validation to test server-side validation
+      page.execute_script("document.querySelector('form').noValidate = true")
 
       # Submit form
       click_button "Create My Assistant"
 
-      # Debug: check if we're still on the same page (validation failed)
-      puts "Current path: #{page.current_path}"
-      puts "Expected path: #{new_trial_path}"
-
       # We should be on the new trial page with validation errors
-      expect(page).to have_current_path(new_trial_path)
+      expect(page).to have_current_path(new_trial_path, wait: 3)
 
-      # Check for individual field error messages
-      expect(page).to have_text("Business name can't be blank").or have_text("Scenario can't be blank").or have_text("Phone e164 can't be blank")
+      # Check for business name error message
+      expect(page).to have_text("Business name can't be blank")
     end
 
     it "handles form submission with valid data" do
@@ -69,13 +70,13 @@ RSpec.describe "Trial Form Mobile Layout", type: :system do
       select "Hvac", from: "Industry"
       fill_in "Business Name", with: "Test HVAC Company"
       select "Lead Intake", from: "Call Type"
-      fill_in "Your Phone Number", with: "+15555551234"
+      fill_in "Your Phone Number", with: "+12125551234"
 
       # Submit form
       click_button "Create My Assistant"
 
       # Should redirect to trial show page (check path pattern instead of specific ID)
-      expect(page).to have_current_path(/\/trials\/[a-f0-9-]+/)
+      expect(page).to have_current_path(/\/trials\/[a-f0-9-]+/, wait: 5)
       expect(page).to have_text("Creating your AI assistant")
     end
   end
@@ -123,7 +124,7 @@ RSpec.describe "Trial Form Mobile Layout", type: :system do
       select "Hvac", from: "Industry"
       fill_in "Business Name", with: "Test Company"
       select "Lead Intake", from: "Call Type"
-      fill_in "Your Phone Number", with: "+15555551234"
+      fill_in "Your Phone Number", with: "+12125551234"
 
       click_button "Create My Assistant"
       expect(page).to have_current_path(trial_path(Trial.last))

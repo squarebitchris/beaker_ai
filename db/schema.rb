@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_26_030348) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_043757) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -87,6 +87,19 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_030348) do
     t.index ["source"], name: "index_email_subscriptions_on_source"
     t.index ["subscribed_at"], name: "index_email_subscriptions_on_subscribed_at"
     t.index ["user_id"], name: "index_email_subscriptions_on_user_id"
+  end
+
+  create_table "knowledge_bases", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "category", null: false
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.string "industry", null: false
+    t.integer "priority", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["industry", "active"], name: "index_knowledge_bases_on_industry_and_active"
+    t.index ["industry", "category", "priority"], name: "index_knowledge_bases_on_industry_and_category_and_priority"
+    t.index ["industry"], name: "index_knowledge_bases_on_industry"
   end
 
   create_table "scenario_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

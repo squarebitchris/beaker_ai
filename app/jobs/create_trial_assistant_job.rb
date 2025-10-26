@@ -54,33 +54,27 @@ class CreateTrialAssistantJob < ApplicationJob
       scenario: trial.scenario
     }
 
-    # Use PromptBuilder to merge template + persona
+    # Generate KB context for this industry
+    kb_context = KbGenerator.to_prompt_context(trial.industry)
+
+    # Use PromptBuilder to merge template + persona + KB
     prompt_data = PromptBuilder.call(
       template: template.prompt_pack,
       persona: persona,
-      kb: {} # No KB for Phase 1
+      kb: { kb_context: kb_context }
     )
 
-    # Build Vapi assistant config
+    # Build Vapi assistant config with correct API structure
     {
       name: "#{trial.business_name} Assistant",
-      model: {
-        provider: "openai",
-        model: "gpt-4o-mini",
-        systemMessage: prompt_data[:system],
-        messages: [
-          {
-            role: "assistant",
-            content: prompt_data[:first_message]
-          }
-        ],
-        tools: prompt_data[:tools]
-      },
-      voice: {
-        provider: "elevenlabs",
-        voiceId: "rachel" # Default voice
-      },
-      maxDurationSeconds: 120, # 2 minute limit for trials
+      system_prompt: prompt_data[:system] + kb_context,
+      first_message: prompt_data[:first_message],
+      functions: prompt_data[:tools] || [],
+      voice_id: "rachel",
+      model: "gpt-4o-mini",
+      temperature: 0.7,
+      max_duration_seconds: 120, # 2 minute limit for trials
+      silence_timeout_seconds: 30,
       metadata: {
         trial_id: trial.id,
         industry: trial.industry,

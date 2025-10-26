@@ -23,6 +23,34 @@ RSpec.describe Trial, type: :model do
       expect(trial).not_to be_valid
       expect(trial.errors[:calls_used]).to include(/cannot exceed limit/)
     end
+
+    describe 'phone duplicate prevention (abuse protection)' do
+      let(:user) { create(:user) }
+      let!(:existing_trial) do
+        create(:trial, user: user, phone_e164: '+15551234567', created_at: 1.hour.ago)
+      end
+
+      it 'prevents duplicate phone within 48 hours for same user' do
+        duplicate_trial = build(:trial, user: user, phone_e164: '+15551234567')
+
+        expect(duplicate_trial).not_to be_valid
+        expect(duplicate_trial.errors[:phone_e164]).to include(/recently created a trial/)
+      end
+
+      it 'allows same phone after 48 hours' do
+        existing_trial.update_column(:created_at, 49.hours.ago)
+
+        new_trial = build(:trial, user: user, phone_e164: '+15551234567')
+        expect(new_trial).to be_valid
+      end
+
+      it 'allows same phone for different users' do
+        other_user = create(:user)
+        new_trial = build(:trial, user: other_user, phone_e164: '+15551234567')
+
+        expect(new_trial).to be_valid
+      end
+    end
   end
 
   describe 'enums' do
@@ -48,6 +76,33 @@ RSpec.describe Trial, type: :model do
     it 'sets expires_at on creation' do
       trial = create(:trial)
       expect(trial.expires_at).to be_within(1.second).of(48.hours.from_now)
+    end
+  end
+
+  describe 'phone normalization' do
+    it 'normalizes phone to E.164 format' do
+      trial = create(:trial, phone_e164: '5551234567')
+      expect(trial.phone_e164).to eq('+15551234567')
+    end
+
+    it 'adds +1 prefix if missing' do
+      trial = create(:trial, phone_e164: '5551234567')
+      expect(trial.phone_e164).to eq('+15551234567')
+    end
+
+    it 'preserves existing +1 prefix' do
+      trial = create(:trial, phone_e164: '+15551234567')
+      expect(trial.phone_e164).to eq('+15551234567')
+    end
+
+    it 'removes non-digit characters' do
+      trial = create(:trial, phone_e164: '(555) 123-4567')
+      expect(trial.phone_e164).to eq('+15551234567')
+    end
+
+    it 'handles phone with spaces and dashes' do
+      trial = create(:trial, phone_e164: '+1 555-123-4567')
+      expect(trial.phone_e164).to eq('+15551234567')
     end
   end
 

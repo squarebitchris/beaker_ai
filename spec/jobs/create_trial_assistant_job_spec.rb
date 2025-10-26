@@ -36,8 +36,8 @@ RSpec.describe CreateTrialAssistantJob, type: :job do
         expect(trial.vapi_assistant_id).to eq('asst_123456789')
         expect(trial.assistant_config).to be_present
         expect(trial.assistant_config['name']).to eq("#{trial.business_name} Assistant")
-        expect(trial.assistant_config['model']['model']).to eq('gpt-4o-mini')
-        expect(trial.assistant_config['maxDurationSeconds']).to eq(120)
+        expect(trial.assistant_config['model']).to eq('gpt-4o-mini')
+        expect(trial.assistant_config['max_duration_seconds']).to eq(120)
       end
 
       it 'calls VapiClient with correct configuration' do
@@ -48,15 +48,13 @@ RSpec.describe CreateTrialAssistantJob, type: :job do
         expect(vapi_client).to have_received(:create_assistant).with(
           config: hash_including(
             name: "#{trial.business_name} Assistant",
-            model: hash_including(
-              provider: 'openai',
-              model: 'gpt-4o-mini'
-            ),
-            voice: hash_including(
-              provider: 'elevenlabs',
-              voiceId: 'rachel'
-            ),
-            maxDurationSeconds: 120,
+            system_prompt: String,
+            first_message: String,
+            voice_id: 'rachel',
+            model: 'gpt-4o-mini',
+            temperature: 0.7,
+            max_duration_seconds: 120,
+            silence_timeout_seconds: 30,
             metadata: hash_including(
               trial_id: trial.id,
               industry: trial.industry,
@@ -74,7 +72,7 @@ RSpec.describe CreateTrialAssistantJob, type: :job do
             industry: trial.industry,
             scenario: trial.scenario
           },
-          kb: {}
+          kb: hash_including(kb_context: kind_of(String))
         ).and_call_original
 
         perform_enqueued_jobs do

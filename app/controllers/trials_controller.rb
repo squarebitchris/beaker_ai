@@ -9,6 +9,21 @@ class TrialsController < ApplicationController
   end
 
   def create
+    # Check user rate limit (abuse prevention)
+    unless current_user.can_create_trial?
+      flash[:alert] = "Trial creation limit reached. Please wait 24 hours before creating another trial."
+      redirect_to new_trial_path
+      return
+    end
+
+    # Check for test/invalid phone numbers (555 area code and toll-free)
+    if trial_params[:phone_e164]&.match?(/\+1(555|800|888|877|866|855|844|833)\d{7}/)
+      flash.now[:alert] = "Please use a real phone number (no test/toll-free numbers)."
+      @trial = current_user.trials.build(trial_params)
+      render :new, status: :unprocessable_entity
+      return
+    end
+
     @trial = current_user.trials.build(trial_params)
 
     Rails.logger.info("[Trials] Attempting to save trial with params: #{trial_params}")
@@ -16,6 +31,13 @@ class TrialsController < ApplicationController
     Rails.logger.info("[Trials] Trial errors: #{@trial.errors.full_messages}")
 
     if @trial.save
+      # Log for abuse monitoring
+      Rails.logger.info(
+        "[TrialAbuse] Trial created: user=#{current_user.id}, " \
+        "ip=#{request.remote_ip}, phone=#{@trial.phone_e164}, " \
+        "user_trial_count=#{current_user.trials.count}"
+      )
+
       CreateTrialAssistantJob.perform_later(@trial.id)
       redirect_to trial_path(@trial),
                   notice: "Creating your AI assistant. This usually takes 10-20 seconds..."

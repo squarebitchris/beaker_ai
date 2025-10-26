@@ -99,6 +99,112 @@ RSpec.describe 'Rack::Attack Rate Limiting', type: :request do
     end
   end
 
+  describe 'trial creation rate limiting (ABUSE PREVENTION)' do
+    let(:user) { create(:user) }
+
+    before do
+      sign_in user
+      create(:scenario_template, :hvac_lead_intake)
+    end
+
+    it 'allows 3 trial creations per hour per IP' do
+      3.times do |i|
+        post '/trials', params: {
+          trial: attributes_for(:trial).merge(
+            business_name: "Business #{i}",
+            phone_e164: "+1212000#{1000 + i}"
+          )
+        }
+        expect(response).to have_http_status(:redirect)
+      end
+    end
+
+    it 'blocks 4th trial creation with 429 status' do
+      # Make 3 successful requests
+      3.times do |i|
+        post '/trials', params: {
+          trial: attributes_for(:trial).merge(
+            business_name: "Business #{i}",
+            phone_e164: "+1212000#{2000 + i}"
+          )
+        }
+      end
+
+      # 4th request should be rate limited
+      post '/trials', params: {
+        trial: attributes_for(:trial).merge(phone_e164: "+12120002100")
+      }
+      expect(response).to have_http_status(:too_many_requests)
+      expect(response.content_type).to include('application/json')
+
+      response_body = JSON.parse(response.body)
+      expect(response_body['error']).to eq('Rate limit exceeded. Please try again later.')
+    end
+
+    it 'resets trial rate limit after 1 hour' do
+      # Make 3 requests
+      3.times do |i|
+        post '/trials', params: {
+          trial: attributes_for(:trial).merge(
+            business_name: "Business #{i}",
+            phone_e164: "+1212000#{3000 + i}"
+          )
+        }
+      end
+
+      # 4th should be blocked
+      post '/trials', params: {
+        trial: attributes_for(:trial).merge(phone_e164: "+12120003100")
+      }
+      expect(response).to have_http_status(:too_many_requests)
+
+      # Travel forward past rate limit period
+      travel 61.minutes do
+        post '/trials', params: {
+          trial: attributes_for(:trial).merge(
+            business_name: "Reset Business",
+            phone_e164: "+12120003200"
+          )
+        }
+        expect(response).to have_http_status(:redirect)
+      end
+    end
+  end
+
+  describe 'disposable email blocking (ABUSE PREVENTION)' do
+    let(:disposable_emails) do
+      %w[
+        test@guerrillamail.com
+        test@mailinator.com
+        test@10minutemail.com
+        test@tempmail.com
+        test@sharklasers.com
+      ]
+    end
+
+    it 'blocks login attempts with disposable email domains' do
+      disposable_emails.each do |email|
+        post '/users/sign_in', params: { user: { email: email } }
+        expect(response).to have_http_status(:forbidden)
+        expect(response.body).to include('Forbidden')
+      end
+    end
+
+    it 'allows login with legitimate email domains' do
+      legitimate_emails = %w[
+        user@gmail.com
+        user@yahoo.com
+        user@outlook.com
+        user@example.com
+      ]
+
+      legitimate_emails.each do |email|
+        post '/users/sign_in', params: { user: { email: email } }
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
+
   describe 'general IP rate limiting' do
     it 'allows 100 requests per minute per IP' do
       # Make 100 requests to various endpoints
