@@ -23,7 +23,7 @@ FactoryBot.define do
       prompt_pack do
         {
           "system" => "You are a professional HVAC assistant specializing in lead intake and qualification.",
-          "first_message" => "Hi! I'm calling from [COMPANY_NAME] about your HVAC needs. Do you have a few minutes to talk?",
+          "first_message" => "Hi! I'm calling from {{business_name}} about your HVAC needs. Do you have a few minutes to talk?",
           "tools" => [
             {
               "type" => "function",

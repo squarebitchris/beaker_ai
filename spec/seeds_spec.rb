@@ -25,7 +25,7 @@ RSpec.describe 'Seeds' do
       expect(prompt_pack).to have_key('tools')
 
       expect(prompt_pack['system']).to include('HVAC assistant')
-      expect(prompt_pack['first_message']).to include('[COMPANY_NAME]')
+      expect(prompt_pack['first_message']).to include('{{business_name}}')
 
       tools = prompt_pack['tools']
       expect(tools).to be_an(Array)

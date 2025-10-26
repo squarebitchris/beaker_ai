@@ -13,7 +13,7 @@ ScenarioTemplate.find_or_create_by!(key: "hvac_lead_intake", active: true) do |t
   template.version = 1
   template.prompt_pack = {
     "system" => "You are a professional HVAC assistant specializing in lead intake and qualification. Your goal is to gather contact information and understand the customer's HVAC needs. Be friendly, professional, and efficient. Keep calls under 2 minutes.",
-    "first_message" => "Hi! I'm calling from [COMPANY_NAME] about your HVAC needs. Do you have a few minutes to talk?",
+    "first_message" => "Hi! I'm calling from {{business_name}} about your HVAC needs. Do you have a few minutes to talk?",
     "tools" => [
       {
         "type" => "function",
