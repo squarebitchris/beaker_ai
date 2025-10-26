@@ -70,7 +70,7 @@ RSpec.describe 'Factories' do
     it 'creates pro plan business' do
       business = build(:business, :pro_plan)
       expect(business.plan).to eq('pro')
-      expect(business.calls_included).to eq(500)
+      expect(business.calls_included).to eq(300)  # Updated from 500 to protect margins
     end
 
     it 'creates business with owner' do

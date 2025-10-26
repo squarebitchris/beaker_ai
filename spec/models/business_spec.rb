@@ -74,4 +74,54 @@ RSpec.describe Business, type: :model do
       expect(business).not_to be_over_limit
     end
   end
+
+  describe '#stripe_price_id' do
+    it 'returns price_id from StripePlan for starter' do
+      plan = create(:stripe_plan, plan_name: 'starter', stripe_price_id: 'price_123')
+      business = build(:business, plan: 'starter')
+      expect(business.stripe_price_id).to eq('price_123')
+    end
+
+    it 'returns price_id from StripePlan for pro' do
+      plan = create(:stripe_plan, plan_name: 'pro', stripe_price_id: 'price_456')
+      business = build(:business, plan: 'pro')
+      expect(business.stripe_price_id).to eq('price_456')
+    end
+
+    it 'returns nil when StripePlan not found' do
+      business = build(:business, plan: 'starter')
+      expect(business.stripe_price_id).to be_nil
+    end
+  end
+
+  describe 'StripePlan integration' do
+    context 'with StripePlan records' do
+      let!(:starter_plan) { create(:stripe_plan, plan_name: 'starter', calls_included: 100) }
+      let!(:pro_plan) { create(:stripe_plan, plan_name: 'pro', calls_included: 300) }
+
+      it 'uses StripePlan calls_included for starter' do
+        business = create(:business, plan: 'starter', calls_included: nil)
+        expect(business.calls_included).to eq(100)
+      end
+
+      it 'uses StripePlan calls_included for pro' do
+        business = create(:business, plan: 'pro', calls_included: nil)
+        expect(business.calls_included).to eq(300)
+      end
+    end
+
+    context 'without StripePlan records (fallback)' do
+      it 'falls back to default for starter' do
+        business = Business.new(plan: 'starter', name: 'Test', stripe_customer_id: 'cus_test')
+        business.valid?
+        expect(business.calls_included).to eq(100)
+      end
+
+      it 'falls back to default for pro' do
+        business = Business.new(plan: 'pro', name: 'Test', stripe_customer_id: 'cus_test')
+        business.valid?
+        expect(business.calls_included).to eq(300)
+      end
+    end
+  end
 end

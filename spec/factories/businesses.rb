@@ -9,7 +9,7 @@ FactoryBot.define do
 
     trait :pro_plan do
       plan { 'pro' }
-      calls_included { 500 }
+      calls_included { 300 }  # Updated from 500 to protect margins
     end
 
     trait :with_owner do
