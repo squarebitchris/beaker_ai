@@ -20,6 +20,13 @@ Rails.application.routes.draw do
   get "/signup", to: "signups#new", as: :new_signup
   post "/signup", to: "signups#create", as: :signups
 
+  # Trial flow (authenticated)
+  resources :trials, only: [ :new, :create, :show ] do
+    member do
+      post :call
+    end
+  end
+
   # Webhook endpoints
   post "/webhooks/stripe", to: "webhooks#create", defaults: { provider: "stripe" }
   post "/webhooks/twilio", to: "webhooks#create", defaults: { provider: "twilio" }
@@ -29,6 +36,10 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
+  # Authenticated users go to trials, guests see signup
+  authenticated :user do
+    root to: "trials#new", as: :authenticated_root
+  end
+
   root "signups#new"
 end

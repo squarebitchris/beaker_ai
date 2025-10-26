@@ -24,6 +24,10 @@ class Trial < ApplicationRecord
     expires_at < Time.current
   end
 
+  def ready?
+    vapi_assistant_id.present? && status == "active"
+  end
+
   private
 
   def set_expires_at

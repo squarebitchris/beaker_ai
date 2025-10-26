@@ -30,7 +30,7 @@ RSpec.describe 'Magic Link Authentication', type: :request do
 
       get users_magic_link_path, params: { user: { email: user.email, token: token } }
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(new_trial_path)
     end
 
     it 'rejects expired token' do

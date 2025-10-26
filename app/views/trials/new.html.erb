@@ -1,0 +1,51 @@
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <h1 class="text-3xl font-bold mb-6">Create Your AI Assistant</h1>
+  
+  <%= form_with model: @trial, url: trials_path, method: :post, local: true, class: "space-y-6" do |f| %>
+    <% if @trial.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <h3 class="text-red-800 font-semibold mb-2">Please correct the following:</h3>
+        <ul class="list-disc list-inside text-red-700">
+          <% @trial.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :industry, class: "block text-sm font-medium mb-2" %>
+      <%= f.select :industry, 
+          Trial.industries.keys.map { |k| [k.titleize, k] },
+          { prompt: "Select industry..." },
+          { class: "w-full px-4 py-3 border rounded-lg", required: true } %>
+    </div>
+
+    <div>
+      <%= f.label :business_name, class: "block text-sm font-medium mb-2" %>
+      <%= f.text_field :business_name, 
+          placeholder: "e.g., Acme HVAC",
+          class: "w-full px-4 py-3 border rounded-lg", 
+          required: true %>
+    </div>
+
+    <div>
+      <%= f.label :scenario, class: "block text-sm font-medium mb-2" %>
+      <%= f.select :scenario,
+          [["Lead Intake", "lead_intake"], ["FAQ", "faq"], ["Scheduling", "scheduling"]],
+          { prompt: "Select scenario..." },
+          { class: "w-full px-4 py-3 border rounded-lg", required: true } %>
+    </div>
+
+    <div>
+      <%= f.label :phone_e164, "Your Phone Number", class: "block text-sm font-medium mb-2" %>
+      <%= f.text_field :phone_e164,
+          placeholder: "+15555551234",
+          class: "w-full px-4 py-3 border rounded-lg",
+          required: true %>
+      <p class="text-sm text-gray-600 mt-1">Format: +1XXXXXXXXXX (US only)</p>
+    </div>
+
+    <%= f.submit "Create Assistant", class: "w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700" %>
+  <% end %>
+</div>

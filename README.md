@@ -80,7 +80,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [ ] **R1-E02-T007** - Trial status page with ready polling (3 pts)
 - [ ] **R1-E02-T008** - "Call Me Now" button + phone input UI (3 pts)
 - [x] **R1-E02-T009** - SignupsController (email + marketing consent) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E02-T009.md)
-- [x] **R1-E02-T010** - Trial limits enforcement (3 calls, 120s cap) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E02-T009.md)
+- [x] **R1-E02-T010** - TrialSessionsController (new/create/show with polling) (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E02-T010.md)
 - [x] **R1-E02-T011** - QuietHours service (basic timezone) (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E02-T009.md)
 - [ ] **R1-E02-T012** - Trial abuse prevention (email normalization, IP throttles) (4 pts)
 - [ ] **R1-E02-T013** - Mobile-first responsive UI for trial flow (5 pts)
