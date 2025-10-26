@@ -1,0 +1,107 @@
+{
+  "name": "beaker-ai",
+  "description": "Voice-First AI Phone Agent Platform",
+  "repository": "https://github.com/yourusername/beaker_ai",
+  "stack": "heroku-24",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "heroku/ruby"
+    }
+  ],
+  "addons": [
+    {
+      "plan": "heroku-postgresql:essential-0",
+      "as": "DATABASE"
+    }
+  ],
+  "env": {
+    "RAILS_ENV": {
+      "value": "production"
+    },
+    "RACK_ENV": {
+      "value": "production"
+    },
+    "RAILS_SERVE_STATIC_FILES": {
+      "value": "true"
+    },
+    "RAILS_LOG_TO_STDOUT": {
+      "value": "true"
+    },
+    "LANG": {
+      "value": "en_US.UTF-8"
+    },
+    "RAILS_MASTER_KEY": {
+      "description": "Rails master key for credentials (from config/master.key)",
+      "required": true
+    },
+    "APP_HOST": {
+      "description": "Application host domain",
+      "value": "beaker-ai.herokuapp.com"
+    },
+    "VAPI_API_KEY": {
+      "description": "Vapi.ai API key for voice AI (use test key)",
+      "required": false
+    },
+    "TWILIO_ACCOUNT_SID": {
+      "description": "Twilio Account SID (use test credentials)",
+      "required": false
+    },
+    "TWILIO_AUTH_TOKEN": {
+      "description": "Twilio Auth Token",
+      "required": false
+    },
+    "TWILIO_STATUS_CALLBACK_URL": {
+      "description": "Twilio status callback webhook URL",
+      "value": "https://beaker-ai.herokuapp.com/webhooks/twilio"
+    },
+    "TWILIO_VOICE_URL": {
+      "description": "Twilio voice webhook URL",
+      "value": "https://beaker-ai.herokuapp.com/voice"
+    },
+    "STRIPE_SECRET_KEY": {
+      "description": "Stripe secret key (use test key: sk_test_...)",
+      "required": false
+    },
+    "STRIPE_WEBHOOK_SECRET": {
+      "description": "Stripe webhook signing secret",
+      "required": false
+    },
+    "STRIPE_SUCCESS_URL": {
+      "description": "Stripe checkout success redirect URL",
+      "value": "https://beaker-ai.herokuapp.com/success"
+    },
+    "STRIPE_CANCEL_URL": {
+      "description": "Stripe checkout cancel redirect URL",
+      "value": "https://beaker-ai.herokuapp.com/cancel"
+    },
+    "SENTRY_DSN": {
+      "description": "Sentry error tracking DSN",
+      "required": false
+    },
+    "SENDGRID_API_KEY": {
+      "description": "SendGrid API key for email delivery (optional)",
+      "required": false
+    },
+    "MAILER_FROM": {
+      "description": "Default email sender address",
+      "value": "noreply@beaker-ai.herokuapp.com"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    },
+    "worker": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "scripts": {
+    "postdeploy": "bundle exec rails db:schema:load"
+  }
+}
+
