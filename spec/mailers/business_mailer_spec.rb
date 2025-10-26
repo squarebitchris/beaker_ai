@@ -24,7 +24,7 @@ RSpec.describe BusinessMailer, type: :mailer do
     end
 
     it 'recipients are correct' do
-      expect(mail.to).to eq([user.email])
+      expect(mail.to).to eq([ user.email ])
     end
 
     it 'assigns @business' do
@@ -70,4 +70,3 @@ RSpec.describe BusinessMailer, type: :mailer do
     end
   end
 end
-

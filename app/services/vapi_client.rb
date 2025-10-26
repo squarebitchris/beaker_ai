@@ -77,7 +77,7 @@ class VapiClient < ApiClientBase
   private
 
   def build_assistant_payload(config)
-    {
+    payload = {
       name: config[:name],
       model: {
         provider: "openai",
@@ -90,14 +90,21 @@ class VapiClient < ApiClientBase
         voiceId: config[:voice_id] || "rachel"
       },
       firstMessage: config[:first_message],
-      functions: config[:functions] || [],
-      maxDurationSeconds: config[:max_duration_seconds] || 120,
-      silenceTimeoutSeconds: config[:silence_timeout_seconds] || 30,
-      serverUrl: config[:server_url] || "#{ENV.fetch('APP_URL', 'http://localhost:3000')}/webhooks/vapi"
-    }.tap do |payload|
-      # Add optional metadata if provided
-      payload[:metadata] = config[:metadata] if config[:metadata]
-    end
+      functions: config[:functions] || []
+    }
+
+    # Only include maxDurationSeconds if explicitly set (not nil)
+    # Omitting the field allows unlimited duration for paid assistants
+    payload[:maxDurationSeconds] = config[:max_duration_seconds] if config[:max_duration_seconds].present?
+
+    # Silence timeout should always be included
+    payload[:silenceTimeoutSeconds] = config[:silence_timeout_seconds] || 30
+    payload[:serverUrl] = config[:server_url] || "#{ENV.fetch('APP_URL', 'http://localhost:3000')}/webhooks/vapi"
+
+    # Add optional metadata if provided
+    payload[:metadata] = config[:metadata] if config[:metadata]
+
+    payload
   end
 
   def make_request(method, path, payload = nil)

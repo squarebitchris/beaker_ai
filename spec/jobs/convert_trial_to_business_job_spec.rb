@@ -80,10 +80,18 @@ RSpec.describe ConvertTrialToBusinessJob, type: :job do
         allow(VapiClient).to receive(:new).and_return(vapi_client)
 
         expect(vapi_client).to receive(:create_assistant) do |config:|
+          # Verify unlimited duration (nil value)
           expect(config[:max_duration_seconds]).to be_nil
+
+          # Verify other business assistant attributes
           expect(config[:name]).to eq("#{business_name} Assistant")
           expect(config[:metadata][:business_name]).to eq(business_name)
           expect(config[:metadata][:industry]).to eq('hvac')
+          expect(config[:metadata][:trial_id]).to eq(trial.id)
+
+          # Verify webhook URL is set
+          expect(config[:server_url]).to be_present
+
           {
             'id' => "asst_#{SecureRandom.hex(12)}",
             'name' => "#{business_name} Assistant"
@@ -228,4 +236,3 @@ RSpec.describe ConvertTrialToBusinessJob, type: :job do
     end
   end
 end
-

@@ -12,4 +12,3 @@ class BusinessMailerPreview < ActionMailer::Preview
     BusinessMailer.agent_ready(business.id)
   end
 end
-

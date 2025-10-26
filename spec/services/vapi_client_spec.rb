@@ -112,6 +112,46 @@ RSpec.describe VapiClient, vcr: false do
 
         client.create_assistant(config: config)
       end
+
+      it 'omits maxDurationSeconds when nil (unlimited duration)' do
+        config_unlimited = config.merge(max_duration_seconds: nil)
+
+        stub_request(:post, 'https://api.vapi.ai/assistant')
+          .to_return(status: 200, body: { id: 'asst_unlimited' }.to_json)
+
+        result = client.create_assistant(config: config_unlimited)
+        expect(result['id']).to eq('asst_unlimited')
+
+        # Verify the request was made without maxDurationSeconds in the body
+        expect(WebMock).to have_requested(:post, 'https://api.vapi.ai/assistant')
+          .with { |req|
+            body = JSON.parse(req.body)
+            !body.key?('maxDurationSeconds')
+          }
+      end
+
+      it 'includes maxDurationSeconds when explicitly set to 60' do
+        config_limited = config.merge(max_duration_seconds: 60)
+
+        stub_request(:post, 'https://api.vapi.ai/assistant')
+          .with(
+            body: hash_including(maxDurationSeconds: 60)
+          )
+          .to_return(status: 200, body: { id: 'asst_60s' }.to_json)
+
+        result = client.create_assistant(config: config_limited)
+        expect(result['id']).to eq('asst_60s')
+      end
+
+      it 'includes maxDurationSeconds when explicitly set to 120 (trial default)' do
+        stub_request(:post, 'https://api.vapi.ai/assistant')
+          .with(
+            body: hash_including(maxDurationSeconds: 120)
+          )
+          .to_return(status: 200, body: { id: 'asst_trial' }.to_json)
+
+        client.create_assistant(config: config)
+      end
     end
 
     context 'when API fails' do

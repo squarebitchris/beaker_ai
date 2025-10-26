@@ -140,10 +140,10 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 - [x] **R2-E04-T004** - Stripe webhook handler (checkout.session.completed) (4 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T004.md)
 - [x] **R2-E04-T005** - ConvertTrialToBusinessJob (5 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T005.md)
 - [x] **R2-E04-T006** - Business model + migration (3 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T006.md)
-- [ ] **R2-E04-T007** - Clone trial assistant → paid assistant (no caps) (4 pts)
+- [x] **R2-E04-T007** - Clone trial assistant → paid assistant (no caps) (4 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T007.md)
 - [ ] **R2-E04-T008** - Onboarding page shell (2 pts)
-- [ ] **R2-E04-T009** - "Agent Ready" email template (2 pts)
-- [ ] **R2-E04-T010** - Idempotency testing (prevent duplicate businesses) (3 pts)
+- [x] **R2-E04-T009** - "Agent Ready" email template (2 pts) ✅ [Completed in R2-E04-T005](./docs/completed_tickets/R2-E04-T005.md)
+- [x] **R2-E04-T010** - Idempotency testing (prevent duplicate businesses) (3 pts) ✅ [Completed in R2-E04-T005](./docs/completed_tickets/R2-E04-T005.md)
 - [ ] **R2-E04-T011** - Upgrade button in trial UI (2 pts)
 - [ ] **R2-E04-T012** - Stripe Tax configuration (2 pts)
 
