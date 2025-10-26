@@ -14,9 +14,9 @@ class WebhookProcessorJob < ApplicationJob
     processor = case event.provider
     when "stripe"
       if event.event_type.match?(/checkout\.session\.completed/)
-        # Webhooks::Stripe::CheckoutSessionProcessor.new(event) - Phase 3
-        Rails.logger.info("[Webhook] Stripe checkout.session.completed - processor not yet implemented")
-        nil
+        Webhooks::Stripe::CheckoutSessionProcessor.new(event)
+      elsif event.event_type.match?(/customer\.subscription\./)
+        Webhooks::Stripe::SubscriptionProcessor.new(event)
       else
         Rails.logger.warn("[Webhook] No processor for #{event.provider}:#{event.event_type}")
         nil

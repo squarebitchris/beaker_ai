@@ -4,7 +4,7 @@ require 'warden/test/helpers'
 
 module PasswordlessTestHelpers
   # Sign in a user for request specs using passwordless authentication
-  # Uses Warden::Test::Helpers directly to bypass magic link flow  
+  # Uses Warden::Test::Helpers directly to bypass magic link flow
   # Override Devise's sign_in to use Warden's login_as instead
   def sign_in_passwordless(user)
     login_as(user, scope: :user)
@@ -32,4 +32,3 @@ RSpec.configure do |config|
     Warden.test_reset!
   end
 end
-

@@ -53,4 +53,3 @@ RSpec.describe "Upgrade Flow", type: :system do
     expect(page).to have_content("ready")
   end
 end
-

@@ -195,4 +195,120 @@ RSpec.describe WebhookProcessorJob, type: :job do
       end
     end
   end
+
+  describe 'Stripe event processing integration' do
+    let(:user) { create(:user) }
+    let(:trial) { create(:trial, user: user) }
+
+    context 'when checkout.session.completed event is processed' do
+      let(:stripe_event) do
+        create(:webhook_event,
+          provider: "stripe",
+          event_id: "evt_checkout_123",
+          event_type: "checkout.session.completed",
+          payload: {
+            "type" => "checkout.session.completed",
+            "data" => {
+              "object" => {
+                "id" => "cs_test_123",
+                "customer" => "cus_123",
+                "subscription" => "sub_123",
+                "metadata" => {
+                  "user_id" => user.id,
+                  "trial_id" => trial.id,
+                  "plan" => "starter",
+                  "business_name" => "Test HVAC"
+                }
+              }
+            }
+          })
+      end
+
+      it 'processes without errors' do
+        perform_enqueued_jobs do
+          WebhookProcessorJob.perform_later(stripe_event.id)
+        end
+
+        stripe_event.reload
+        expect(stripe_event.status).to eq('completed')
+      end
+    end
+
+    context 'when customer.subscription.* event is processed' do
+      let(:subscription_event) do
+        create(:webhook_event,
+          provider: "stripe",
+          event_id: "evt_sub_updated",
+          event_type: "customer.subscription.updated",
+          payload: {
+            "type" => "customer.subscription.updated",
+            "data" => {
+              "object" => {
+                "id" => "sub_123",
+                "status" => "active"
+              }
+            }
+          })
+      end
+
+      it 'processes subscription event successfully' do
+        perform_enqueued_jobs do
+          WebhookProcessorJob.perform_later(subscription_event.id)
+        end
+
+        subscription_event.reload
+        expect(subscription_event.status).to eq('completed')
+      end
+    end
+
+    context 'with unknown Stripe event type' do
+      let(:unknown_stripe_event) do
+        create(:webhook_event,
+          provider: "stripe",
+          event_id: "evt_unknown",
+          event_type: "payment_intent.succeeded",
+          payload: {
+            "type" => "payment_intent.succeeded",
+            "data" => {}
+          })
+      end
+
+      it 'processes unknown event successfully' do
+        perform_enqueued_jobs do
+          WebhookProcessorJob.perform_later(unknown_stripe_event.id)
+        end
+
+        unknown_stripe_event.reload
+        expect(unknown_stripe_event.status).to eq('completed')
+      end
+    end
+
+    context 'with missing metadata in checkout.session.completed' do
+      let(:invalid_stripe_event) do
+        create(:webhook_event,
+          provider: "stripe",
+          event_id: "evt_no_metadata",
+          event_type: "checkout.session.completed",
+          payload: {
+            "type" => "checkout.session.completed",
+            "data" => {
+              "object" => {
+                "id" => "cs_test_123",
+                "customer" => "cus_123"
+                # Missing metadata
+              }
+            }
+          })
+      end
+
+      it 'processes event even with missing metadata' do
+        perform_enqueued_jobs do
+          WebhookProcessorJob.perform_later(invalid_stripe_event.id)
+        end
+
+        invalid_stripe_event.reload
+        expect(invalid_stripe_event.status).to eq('completed')
+      end
+    end
+  end
 end
