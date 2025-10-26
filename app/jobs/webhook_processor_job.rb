@@ -11,25 +11,40 @@ class WebhookProcessorJob < ApplicationJob
     event.mark_processing!
 
     # Route to specific processor (to be implemented in future tickets)
-    processor = case [ event.provider, event.event_type ]
-    when [ "stripe", /checkout\.session\.completed/ ]
-      # Webhooks::Stripe::CheckoutSessionProcessor.new(event) - Phase 3
-      Rails.logger.info("[Webhook] Stripe checkout.session.completed - processor not yet implemented")
-      nil
-    when [ "twilio", "call_status" ]
-      # Webhooks::Twilio::CallStatusProcessor.new(event) - Phase 4
-      Rails.logger.info("[Webhook] Twilio call_status - processor not yet implemented")
-      nil
-    when [ "vapi", /call\./ ]
-      # Webhooks::Vapi::CallProcessor.new(event) - Phase 2
-      Rails.logger.info("[Webhook] Vapi call event - processor not yet implemented")
-      nil
+    processor = case event.provider
+    when "stripe"
+      if event.event_type.match?(/checkout\.session\.completed/)
+        # Webhooks::Stripe::CheckoutSessionProcessor.new(event) - Phase 3
+        Rails.logger.info("[Webhook] Stripe checkout.session.completed - processor not yet implemented")
+        nil
+      else
+        Rails.logger.warn("[Webhook] No processor for #{event.provider}:#{event.event_type}")
+        nil
+      end
+    when "twilio"
+      if event.event_type == "call_status"
+        # Webhooks::Twilio::CallStatusProcessor.new(event) - Phase 4
+        Rails.logger.info("[Webhook] Twilio call_status - processor not yet implemented")
+        nil
+      else
+        Rails.logger.warn("[Webhook] No processor for #{event.provider}:#{event.event_type}")
+        nil
+      end
+    when "vapi"
+      if event.event_type.match?(/call\./)
+        Webhooks::Vapi::CallProcessor.new(event)
+      else
+        Rails.logger.warn("[Webhook] No processor for #{event.provider}:#{event.event_type}")
+        nil
+      end
     else
       Rails.logger.warn("[Webhook] No processor for #{event.provider}:#{event.event_type}")
       nil
     end
 
-    processor&.process
+    # Call process if processor exists and implements it
+    processor.process if processor&.respond_to?(:process)
+
     event.mark_completed!
 
     Rails.logger.info("[Webhook] Processed #{event.provider}:#{event.event_type} (#{event.event_id})")

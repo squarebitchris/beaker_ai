@@ -106,7 +106,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 **Epic E-003: Webhook Processing & Conversion Driver**
 
 - [x] **R1-E03-T001** - Vapi webhook endpoint + signature verification (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E03-T001.md)
-- [ ] **R1-E03-T002** - ProcessVapiEventJob (parse call.ended) (4 pts)
+- [x] **R1-E03-T002** - ProcessVapiEventJob (parse call.ended) (4 pts) ✅ [Completed](./docs/completed_tickets/R1-E03-T002.md)
 - [ ] **R1-E03-T003** - LeadExtractor service (from function calls + transcript) (4 pts)
 - [ ] **R1-E03-T004** - IntentClassifier service (3 pts)
 - [ ] **R1-E03-T005** - TrialCall model + database migration (2 pts)
