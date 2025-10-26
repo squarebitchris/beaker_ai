@@ -134,7 +134,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 **Epic E-004: Monetization**
 
-- [ ] **R2-E04-T001** - Stripe client setup + API keys (2 pts)
+- [x] **R2-E04-T001** - Stripe client setup + API keys (2 pts) ✅ [Completed](./docs/completed_tickets/R2-E04-T001.md)
 - [ ] **R2-E04-T002** - Create Stripe products/prices (Starter $199, Pro $499) (2 pts)
 - [ ] **R2-E04-T003** - Checkout session endpoint (3 pts)
 - [ ] **R2-E04-T004** - Stripe webhook handler (checkout.session.completed) (4 pts)

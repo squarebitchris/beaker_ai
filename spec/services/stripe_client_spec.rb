@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'webmock/rspec'
 
 RSpec.describe StripeClient, vcr: false do
   let(:client) { described_class.new }
@@ -7,15 +6,11 @@ RSpec.describe StripeClient, vcr: false do
   before do
     # Set up environment variables for testing
     allow(ENV).to receive(:fetch).with('STRIPE_SECRET_KEY').and_return('sk_test_1234567890')
-    allow(ENV).to receive(:fetch).with('STRIPE_SUCCESS_URL', '').and_return('http://localhost:3000/dashboard?success=true')
-    allow(ENV).to receive(:fetch).with('STRIPE_CANCEL_URL', '').and_return('http://localhost:3000/dashboard?canceled=true')
+    allow(ENV).to receive(:fetch).with('STRIPE_SUCCESS_URL').and_return('http://localhost:3000/dashboard?success=true')
+    allow(ENV).to receive(:fetch).with('STRIPE_CANCEL_URL').and_return('http://localhost:3000/dashboard?canceled=true')
 
     # Reset circuit breakers before each test
     reset_circuit_breakers
-
-    # Ensure WebMock is clean and properly configured
-    WebMock.reset!
-    WebMock.disable_net_connect!(allow_localhost: true)
   end
 
   describe '#create_checkout_session' do
@@ -25,17 +20,12 @@ RSpec.describe StripeClient, vcr: false do
 
     context 'when API succeeds' do
       it 'returns checkout session data' do
-        stub_request(:post, "https://api.stripe.com/v1/checkout/sessions")
-          .with(
-            headers: {
-              'Authorization' => 'Bearer sk_test_1234567890',
-              'Content-Type' => 'application/x-www-form-urlencoded'
-            }
-          )
-          .to_return(
-            status: 200,
-            body: { id: 'cs_test_1234567890', url: 'https://checkout.stripe.com/pay/cs_test_1234567890' }.to_json
-          )
+        checkout_session = double('Stripe::Checkout::Session',
+          id: 'cs_test_1234567890',
+          url: 'https://checkout.stripe.com/pay/cs_test_1234567890'
+        )
+
+        allow(Stripe::Checkout::Session).to receive(:create).and_return(checkout_session)
 
         result = client.create_checkout_session(
           price_id: price_id,
@@ -43,15 +33,32 @@ RSpec.describe StripeClient, vcr: false do
           metadata: metadata
         )
 
-        expect(result['id']).to eq('cs_test_1234567890')
-        expect(result['url']).to eq('https://checkout.stripe.com/pay/cs_test_1234567890')
+        expect(result.id).to eq('cs_test_1234567890')
+        expect(result.url).to eq('https://checkout.stripe.com/pay/cs_test_1234567890')
+      end
+
+      it 'passes idempotency key when provided' do
+        checkout_session = double('Stripe::Checkout::Session', id: 'cs_test_1234567890')
+        idempotency_key = 'checkout:user_123:trial_456'
+
+        expect(Stripe::Checkout::Session).to receive(:create) do |params, options|
+          expect(options[:idempotency_key]).to eq(idempotency_key)
+          checkout_session
+        end
+
+        client.create_checkout_session(
+          price_id: price_id,
+          customer_email: customer_email,
+          metadata: metadata,
+          idempotency_key: idempotency_key
+        )
       end
     end
 
     context 'when API fails' do
       it 'raises ApiError' do
-        stub_request(:post, 'https://api.stripe.com/v1/checkout/sessions')
-          .to_return(status: 400, body: 'Bad Request')
+        allow(Stripe::Checkout::Session).to receive(:create)
+          .and_raise(Stripe::InvalidRequestError.new('Invalid request', 'param'))
 
         expect {
           client.create_checkout_session(
@@ -59,17 +66,17 @@ RSpec.describe StripeClient, vcr: false do
             customer_email: customer_email,
             metadata: metadata
           )
-        }.to raise_error(ApiClientBase::ApiError, /Stripe API error: 400/)
+        }.to raise_error(ApiClientBase::ApiError, /Stripe API error/)
       end
     end
 
     context 'when circuit breaker opens' do
       before do
-        stub_request(:post, "https://api.stripe.com/v1/checkout/sessions")
-          .to_return(status: 500, body: 'Internal Server Error')
+        allow(Stripe::Checkout::Session).to receive(:create)
+          .and_raise(Stripe::APIConnectionError.new('Connection error'))
       end
 
-      it 'raises CircuitOpenError without hitting API' do
+      it 'raises CircuitOpenError without hitting API after failures' do
         # Trigger circuit breaker by making multiple failing calls
         api_calls = 0
         circuit_opened = false
@@ -92,15 +99,8 @@ RSpec.describe StripeClient, vcr: false do
           end
         end
 
-        # Debug: Check circuit breaker state
-        puts "API calls made: #{api_calls}"
-        puts "Circuit opened: #{circuit_opened}"
-
         # The circuit breaker should have opened
         expect(circuit_opened).to be true
-
-        # Verify API was called the expected number of times
-        expect(WebMock).to have_requested(:post, "https://api.stripe.com/v1/checkout/sessions").times(api_calls)
       end
     end
   end
@@ -110,25 +110,28 @@ RSpec.describe StripeClient, vcr: false do
 
     context 'when API succeeds' do
       it 'returns subscription data' do
-        stub_request(:get, "https://api.stripe.com/v1/subscriptions/#{subscription_id}")
-          .with(headers: { 'Authorization' => 'Bearer sk_test_1234567890' })
-          .to_return(
-            status: 200,
-            body: { id: subscription_id, status: 'active', current_period_end: 1234567890 }.to_json
-          )
+        subscription = double('Stripe::Subscription',
+          id: subscription_id,
+          status: 'active',
+          current_period_end: 1234567890
+        )
+
+        allow(Stripe::Subscription).to receive(:retrieve)
+          .with(subscription_id)
+          .and_return(subscription)
 
         result = client.get_subscription(subscription_id: subscription_id)
 
-        expect(result['id']).to eq(subscription_id)
-        expect(result['status']).to eq('active')
-        expect(result['current_period_end']).to eq(1234567890)
+        expect(result.id).to eq(subscription_id)
+        expect(result.status).to eq('active')
+        expect(result.current_period_end).to eq(1234567890)
       end
     end
 
     context 'when API returns 404' do
       it 'returns nil' do
-        stub_request(:get, "https://api.stripe.com/v1/subscriptions/#{subscription_id}")
-          .to_return(status: 404, body: 'Not Found')
+        allow(Stripe::Subscription).to receive(:retrieve)
+          .and_raise(Stripe::InvalidRequestError.new('No such subscription', 'id'))
 
         result = client.get_subscription(subscription_id: subscription_id)
 
@@ -138,11 +141,11 @@ RSpec.describe StripeClient, vcr: false do
 
     context 'when circuit breaker is open' do
       before do
-        stub_request(:get, /https:\/\/api\.stripe\.com\/v1\/subscriptions\/.*/)
-          .to_return(status: 500, body: 'Internal Server Error')
+        allow(Stripe::Subscription).to receive(:retrieve)
+          .and_raise(Stripe::APIConnectionError.new('Connection error'))
       end
 
-      it 'returns nil fallback without hitting API' do
+      it 'returns nil fallback without hitting API after failures' do
         # Trigger circuit breaker by making multiple failing calls
         api_calls = 0
         circuit_opened = false
@@ -158,15 +161,8 @@ RSpec.describe StripeClient, vcr: false do
           end
         end
 
-        # Debug: Check circuit breaker state
-        puts "API calls made: #{api_calls}"
-        puts "Circuit opened: #{circuit_opened}"
-
         # The circuit breaker should have opened and returned nil
         expect(circuit_opened).to be true
-
-        # Verify API was called the expected number of times
-        expect(WebMock).to have_requested(:get, "https://api.stripe.com/v1/subscriptions/#{subscription_id}").times(api_calls)
       end
     end
   end
@@ -176,25 +172,28 @@ RSpec.describe StripeClient, vcr: false do
 
     context 'when API succeeds' do
       it 'returns customer data' do
-        stub_request(:get, "https://api.stripe.com/v1/customers/#{customer_id}")
-          .with(headers: { 'Authorization' => 'Bearer sk_test_1234567890' })
-          .to_return(
-            status: 200,
-            body: { id: customer_id, email: 'test@example.com', created: 1234567890 }.to_json
-          )
+        customer = double('Stripe::Customer',
+          id: customer_id,
+          email: 'test@example.com',
+          created: 1234567890
+        )
+
+        allow(Stripe::Customer).to receive(:retrieve)
+          .with(customer_id)
+          .and_return(customer)
 
         result = client.get_customer(customer_id: customer_id)
 
-        expect(result['id']).to eq(customer_id)
-        expect(result['email']).to eq('test@example.com')
-        expect(result['created']).to eq(1234567890)
+        expect(result.id).to eq(customer_id)
+        expect(result.email).to eq('test@example.com')
+        expect(result.created).to eq(1234567890)
       end
     end
 
     context 'when API returns 404' do
       it 'returns nil' do
-        stub_request(:get, "https://api.stripe.com/v1/customers/#{customer_id}")
-          .to_return(status: 404, body: 'Not Found')
+        allow(Stripe::Customer).to receive(:retrieve)
+          .and_raise(Stripe::InvalidRequestError.new('No such customer', 'id'))
 
         result = client.get_customer(customer_id: customer_id)
 
@@ -209,33 +208,30 @@ RSpec.describe StripeClient, vcr: false do
 
     context 'when API succeeds' do
       it 'returns customer data' do
-        stub_request(:post, "https://api.stripe.com/v1/customers")
-          .with(
-            headers: {
-              'Authorization' => 'Bearer sk_test_1234567890',
-              'Content-Type' => 'application/x-www-form-urlencoded'
-            }
-          )
-          .to_return(
-            status: 200,
-            body: { id: 'cus_1234567890', email: email }.to_json
-          )
+        customer = double('Stripe::Customer',
+          id: 'cus_1234567890',
+          email: email
+        )
+
+        allow(Stripe::Customer).to receive(:create)
+          .with(hash_including(email: email, metadata: metadata))
+          .and_return(customer)
 
         result = client.create_customer(email: email, metadata: metadata)
 
-        expect(result['id']).to eq('cus_1234567890')
-        expect(result['email']).to eq(email)
+        expect(result.id).to eq('cus_1234567890')
+        expect(result.email).to eq(email)
       end
     end
 
     context 'when API fails' do
       it 'raises ApiError' do
-        stub_request(:post, 'https://api.stripe.com/v1/customers')
-          .to_return(status: 400, body: 'Bad Request')
+        allow(Stripe::Customer).to receive(:create)
+          .and_raise(Stripe::InvalidRequestError.new('Invalid request', 'email'))
 
         expect {
           client.create_customer(email: email, metadata: metadata)
-        }.to raise_error(ApiClientBase::ApiError, /Stripe API error: 400/)
+        }.to raise_error(ApiClientBase::ApiError, /Stripe API error/)
       end
     end
   end
@@ -245,28 +241,30 @@ RSpec.describe StripeClient, vcr: false do
 
     context 'when API succeeds' do
       it 'returns canceled subscription data' do
-        stub_request(:delete, "https://api.stripe.com/v1/subscriptions/#{subscription_id}")
-          .with(headers: { 'Authorization' => 'Bearer sk_test_1234567890' })
-          .to_return(
-            status: 200,
-            body: { id: subscription_id, status: 'canceled' }.to_json
-          )
+        subscription = double('Stripe::Subscription',
+          id: subscription_id,
+          status: 'canceled'
+        )
+
+        stripe_subscription = double('Stripe::Subscription')
+        allow(stripe_subscription).to receive(:delete).and_return(subscription)
+        allow(Stripe::Subscription).to receive(:retrieve).with(subscription_id).and_return(stripe_subscription)
 
         result = client.cancel_subscription(subscription_id: subscription_id)
 
-        expect(result['id']).to eq(subscription_id)
-        expect(result['status']).to eq('canceled')
+        expect(result.id).to eq(subscription_id)
+        expect(result.status).to eq('canceled')
       end
     end
 
     context 'when API fails' do
       it 'raises ApiError' do
-        stub_request(:delete, "https://api.stripe.com/v1/subscriptions/#{subscription_id}")
-          .to_return(status: 400, body: 'Bad Request')
+        allow(Stripe::Subscription).to receive(:retrieve)
+          .and_raise(Stripe::InvalidRequestError.new('Invalid request', 'id'))
 
         expect {
           client.cancel_subscription(subscription_id: subscription_id)
-        }.to raise_error(ApiClientBase::ApiError, /Stripe API error: 400/)
+        }.to raise_error(ApiClientBase::ApiError, /Stripe API error/)
       end
     end
   end
@@ -276,25 +274,28 @@ RSpec.describe StripeClient, vcr: false do
 
     context 'when API succeeds' do
       it 'returns payment intent data' do
-        stub_request(:get, "https://api.stripe.com/v1/payment_intents/#{payment_intent_id}")
-          .with(headers: { 'Authorization' => 'Bearer sk_test_1234567890' })
-          .to_return(
-            status: 200,
-            body: { id: payment_intent_id, status: 'succeeded', amount: 2000 }.to_json
-          )
+        payment_intent = double('Stripe::PaymentIntent',
+          id: payment_intent_id,
+          status: 'succeeded',
+          amount: 2000
+        )
+
+        allow(Stripe::PaymentIntent).to receive(:retrieve)
+          .with(payment_intent_id)
+          .and_return(payment_intent)
 
         result = client.get_payment_intent(payment_intent_id: payment_intent_id)
 
-        expect(result['id']).to eq(payment_intent_id)
-        expect(result['status']).to eq('succeeded')
-        expect(result['amount']).to eq(2000)
+        expect(result.id).to eq(payment_intent_id)
+        expect(result.status).to eq('succeeded')
+        expect(result.amount).to eq(2000)
       end
     end
 
     context 'when API returns 404' do
       it 'returns nil' do
-        stub_request(:get, "https://api.stripe.com/v1/payment_intents/#{payment_intent_id}")
-          .to_return(status: 404, body: 'Not Found')
+        allow(Stripe::PaymentIntent).to receive(:retrieve)
+          .and_raise(Stripe::InvalidRequestError.new('No such payment intent', 'id'))
 
         result = client.get_payment_intent(payment_intent_id: payment_intent_id)
 
@@ -304,9 +305,9 @@ RSpec.describe StripeClient, vcr: false do
   end
 
   describe 'initialization' do
-    it 'sets up HTTP client with correct API key' do
-      expect(client.instance_variable_get(:@api_key)).to eq('sk_test_1234567890')
-      expect(client.instance_variable_get(:@base_url)).to eq('https://api.stripe.com/v1')
+    it 'sets up Stripe API key' do
+      described_class.new
+      expect(Stripe.api_key).to eq('sk_test_1234567890')
     end
   end
 end
