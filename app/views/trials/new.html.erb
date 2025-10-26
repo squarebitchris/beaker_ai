@@ -1,51 +1,94 @@
-<div class="container mx-auto px-4 py-8 max-w-2xl">
-  <h1 class="text-3xl font-bold mb-6">Create Your AI Assistant</h1>
-  
-  <%= form_with model: @trial, url: trials_path, method: :post, local: true, class: "space-y-6" do |f| %>
-    <% if @trial.errors.any? %>
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-        <h3 class="text-red-800 font-semibold mb-2">Please correct the following:</h3>
-        <ul class="list-disc list-inside text-red-700">
-          <% @trial.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-          <% end %>
-        </ul>
-      </div>
+<div class="container mx-auto px-4 py-6 max-w-md">
+  <%= render Primitives::CardComponent.new(class: "p-6") do |card| %>
+    <% card.with_title do %>
+      <h1 class="text-2xl font-bold text-center mb-2">Create Your AI Assistant</h1>
+      <p class="text-sm text-muted-foreground text-center">Get a personalized phone call in 60 seconds</p>
     <% end %>
 
-    <div>
-      <%= f.label :industry, class: "block text-sm font-medium mb-2" %>
-      <%= f.select :industry, 
-          Trial.industries.keys.map { |k| [k.titleize, k] },
-          { prompt: "Select industry..." },
-          { class: "w-full px-4 py-3 border rounded-lg", required: true } %>
-    </div>
+    <%= form_with model: @trial, url: trials_path, method: :post, local: true, 
+        class: "space-y-6" do |f| %>
+      
+      <% if @trial.errors.any? || flash[:alert] %>
+        <%= render Primitives::ToastComponent.new(
+          variant: :error,
+          title: "Please correct the following:",
+          message: @trial.errors.any? ? @trial.errors.full_messages.join(", ") : flash[:alert]
+        ) %>
+      <% end %>
 
-    <div>
-      <%= f.label :business_name, class: "block text-sm font-medium mb-2" %>
-      <%= f.text_field :business_name, 
-          placeholder: "e.g., Acme HVAC",
-          class: "w-full px-4 py-3 border rounded-lg", 
-          required: true %>
-    </div>
+      <div>
+        <label for="trial_industry" class="block text-sm font-medium mb-2 text-foreground">
+          Industry<span class="text-destructive">*</span>
+        </label>
+        <%= f.select :industry, 
+            Trial.industries.keys.map { |k| [k.titleize, k] },
+            { prompt: "Select your industry..." },
+            { id: "trial_industry", class: "flex h-11 min-h-[44px] w-full rounded-radius-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors", required: true, aria: { invalid: @trial.errors[:industry].present? } } %>
+        <% if @trial.errors[:industry].any? %>
+          <p class="mt-2 text-sm text-destructive" role="alert">
+            <%= @trial.errors[:industry].first %>
+          </p>
+        <% end %>
+      </div>
 
-    <div>
-      <%= f.label :scenario, class: "block text-sm font-medium mb-2" %>
-      <%= f.select :scenario,
-          [["Lead Intake", "lead_intake"], ["FAQ", "faq"], ["Scheduling", "scheduling"]],
-          { prompt: "Select scenario..." },
-          { class: "w-full px-4 py-3 border rounded-lg", required: true } %>
-    </div>
+      <div>
+        <label for="trial_business_name" class="block text-sm font-medium mb-2 text-foreground">
+          Business Name<span class="text-destructive">*</span>
+        </label>
+        <%= f.text_field :business_name, 
+            placeholder: "e.g., Acme HVAC",
+            id: "trial_business_name",
+            class: "flex h-11 min-h-[44px] w-full rounded-radius-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+            required: true,
+            aria: { invalid: @trial.errors[:business_name].present? } %>
+        <% if @trial.errors[:business_name].any? %>
+          <p class="mt-2 text-sm text-destructive" role="alert">
+            <%= @trial.errors[:business_name].first %>
+          </p>
+        <% end %>
+      </div>
 
-    <div>
-      <%= f.label :phone_e164, "Your Phone Number", class: "block text-sm font-medium mb-2" %>
-      <%= f.text_field :phone_e164,
-          placeholder: "+15555551234",
-          class: "w-full px-4 py-3 border rounded-lg",
-          required: true %>
-      <p class="text-sm text-gray-600 mt-1">Format: +1XXXXXXXXXX (US only)</p>
-    </div>
+      <div>
+        <label for="trial_scenario" class="block text-sm font-medium mb-2 text-foreground">
+          Call Type<span class="text-destructive">*</span>
+        </label>
+        <%= f.select :scenario,
+            [["Lead Intake", "lead_intake"], ["FAQ", "faq"], ["Scheduling", "scheduling"]],
+            { prompt: "What should your assistant do?" },
+            { id: "trial_scenario", class: "flex h-11 min-h-[44px] w-full rounded-radius-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors", required: true, aria: { invalid: @trial.errors[:scenario].present? } } %>
+        <% if @trial.errors[:scenario].any? %>
+          <p class="mt-2 text-sm text-destructive" role="alert">
+            <%= @trial.errors[:scenario].first %>
+          </p>
+        <% end %>
+      </div>
 
-    <%= f.submit "Create Assistant", class: "w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700" %>
+      <div>
+        <label for="trial_phone_e164" class="block text-sm font-medium mb-2 text-foreground">
+          Your Phone Number<span class="text-destructive">*</span>
+        </label>
+        <%= f.text_field :phone_e164,
+            placeholder: "+15555551234",
+            id: "trial_phone_e164",
+            class: "flex h-11 min-h-[44px] w-full rounded-radius-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+            required: true,
+            aria: { invalid: @trial.errors[:phone_e164].present? } %>
+        <p class="mt-2 text-sm text-muted-foreground">Format: +1XXXXXXXXXX (US only)</p>
+        <% if @trial.errors[:phone_e164].any? %>
+          <p class="mt-2 text-sm text-destructive" role="alert">
+            <%= @trial.errors[:phone_e164].first %>
+          </p>
+        <% end %>
+      </div>
+
+      <%= render Primitives::ButtonComponent.new(
+        type: "submit",
+        size: :lg,
+        class: "w-full",
+        loading: false
+      ) do %>
+        Create My Assistant
+      <% end %>
+    <% end %>
   <% end %>
 </div>

@@ -50,6 +50,13 @@ RSpec.configure do |config|
 
   # Devise test helpers
   config.include Devise::Test::IntegrationHelpers, type: :request
+  config.include Devise::Test::IntegrationHelpers, type: :system
+  config.include Warden::Test::Helpers, type: :system
+
+  # Clean up Warden after each test
+  config.after(:each, type: :system) do
+    Warden.test_reset!
+  end
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false

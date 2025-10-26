@@ -11,18 +11,25 @@ class TrialsController < ApplicationController
   def create
     @trial = current_user.trials.build(trial_params)
 
+    Rails.logger.info("[Trials] Attempting to save trial with params: #{trial_params}")
+    Rails.logger.info("[Trials] Trial valid? #{@trial.valid?}")
+    Rails.logger.info("[Trials] Trial errors: #{@trial.errors.full_messages}")
+
     if @trial.save
       CreateTrialAssistantJob.perform_later(@trial.id)
       redirect_to trial_path(@trial),
                   notice: "Creating your AI assistant. This usually takes 10-20 seconds..."
     else
+      Rails.logger.info("[Trials] Save failed, errors: #{@trial.errors.full_messages}")
       flash.now[:alert] = "Please correct the errors below."
       render :new, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error("[Trials] Validation failed: #{e.message}")
     Sentry.capture_exception(e, extra: { user_id: current_user.id, params: trial_params })
-    flash.now[:alert] = "Unable to create trial. Please check your information and try again."
+    # Ensure @trial has validation errors for the view
+    @trial = e.record
+    flash.now[:alert] = "Please correct the errors below."
     render :new, status: :unprocessable_entity
   rescue => e
     Rails.logger.error("[Trials] Unexpected error: #{e.message}")
