@@ -160,6 +160,7 @@ RSpec.describe ConvertTrialToBusinessJob, type: :job do
       end
 
       it 'logs idempotency message' do
+        allow(Rails.logger).to receive(:info).and_call_original
         expect(Rails.logger).to receive(:info).with(/Already converted/)
         described_class.perform_now(**job_params)
       end
@@ -232,6 +233,54 @@ RSpec.describe ConvertTrialToBusinessJob, type: :job do
         end
 
         described_class.perform_now(**job_params)
+      end
+    end
+
+    context 'when concurrent webhook processing occurs (race condition)' do
+      it 'creates only one business when jobs run simultaneously' do
+        # Simulate Stripe webhook arriving twice at exact same time
+        # Both workers pass Business.exists? check before either creates record
+        
+        threads = Array.new(2) do
+          Thread.new do
+            Thread.current.abort_on_exception = false
+            begin
+              described_class.perform_now(**job_params)
+            rescue StandardError => e
+              # One thread will hit validation error - this is expected
+              Rails.logger.info("Thread caught error: #{e.class}")
+            end
+          end
+        end
+        
+        threads.each(&:join)
+        
+        # Only one business should exist
+        expect(Business.where(stripe_subscription_id: stripe_subscription_id).count).to eq(1)
+        
+        # Verify business has correct data
+        business = Business.find_by(stripe_subscription_id: stripe_subscription_id)
+        expect(business).to be_present
+        expect(business.name).to eq(business_name)
+        expect(business.plan).to eq(plan)
+      end
+      
+      it 'handles database constraint violation gracefully' do
+        # Create business in one thread
+        business1 = nil
+        Thread.new do
+          business1 = described_class.perform_now(**job_params)
+        end.join
+        
+        # Attempt to create duplicate (should not raise error, returns nil due to idempotency check)
+        # The job returns nil when business already exists
+        result = described_class.perform_now(**job_params)
+        
+        # The job returns nil when idempotency check triggers
+        expect(result).to be_nil
+        
+        # Still only one business exists
+        expect(Business.where(stripe_subscription_id: stripe_subscription_id).count).to eq(1)
       end
     end
   end

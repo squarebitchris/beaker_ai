@@ -15,7 +15,34 @@ RSpec.describe Business, type: :model do
     it { should validate_presence_of(:stripe_customer_id) }
     it { should validate_presence_of(:plan) }
     it { should validate_uniqueness_of(:stripe_customer_id) }
+    it { should validate_uniqueness_of(:stripe_subscription_id).allow_nil }
     it { should validate_numericality_of(:calls_included).is_greater_than(0) }
+  end
+
+  describe 'database constraints' do
+    it 'enforces unique stripe_subscription_id (Rails validation first)' do
+      # Create first business with subscription_id
+      create(:business, stripe_subscription_id: 'sub_unique123')
+      
+      # Attempt to create duplicate - Rails validation catches it first
+      expect {
+        Business.create!(
+          name: 'Duplicate Business',
+          stripe_customer_id: 'cus_different',
+          stripe_subscription_id: 'sub_unique123',  # Same subscription ID
+          plan: 'starter',
+          calls_included: 100
+        )
+      }.to raise_error(ActiveRecord::RecordInvalid, /Stripe subscription has already been taken/)
+    end
+    
+    it 'allows multiple businesses with NULL subscription_id' do
+      business1 = create(:business, stripe_subscription_id: nil)
+      business2 = create(:business, stripe_subscription_id: nil)
+      
+      expect(business1).to be_persisted
+      expect(business2).to be_persisted
+    end
   end
 
   describe 'enums' do

@@ -10,6 +10,7 @@ class Business < ApplicationRecord
 
   validates :name, :stripe_customer_id, :plan, presence: true
   validates :stripe_customer_id, uniqueness: true
+  validates :stripe_subscription_id, uniqueness: true, allow_nil: true
   validates :calls_included, numericality: { greater_than: 0 }
 
   before_validation :set_calls_included, on: :create

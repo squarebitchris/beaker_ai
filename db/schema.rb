@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_26_180800) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_192229) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -41,6 +41,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_26_180800) do
     t.index ["plan"], name: "index_businesses_on_plan"
     t.index ["status"], name: "index_businesses_on_status"
     t.index ["stripe_customer_id"], name: "index_businesses_on_stripe_customer_id", unique: true
+    t.index ["stripe_subscription_id"], name: "idx_businesses_unique_stripe_subscription_id", unique: true, where: "(stripe_subscription_id IS NOT NULL)"
     t.index ["stripe_subscription_id"], name: "index_businesses_on_stripe_subscription_id"
     t.index ["trial_id"], name: "index_businesses_on_trial_id"
     t.index ["vapi_assistant_id"], name: "index_businesses_on_vapi_assistant_id"

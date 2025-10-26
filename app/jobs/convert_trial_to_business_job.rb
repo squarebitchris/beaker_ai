@@ -61,6 +61,24 @@ class ConvertTrialToBusinessJob < ApplicationJob
       business
     end
 
+  rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
+    # Another worker already created this business (race condition)
+    # Rails validation or database constraint hit
+    existing_business = Business.find_by(stripe_subscription_id: stripe_subscription_id)
+    if existing_business
+      Rails.logger.info("[ConvertTrialToBusinessJob] Business already exists (race condition): subscription=#{stripe_subscription_id}, business_id=#{existing_business.id}")
+      existing_business
+    else
+      # Edge case: constraint hit but business not found (should not happen)
+      Rails.logger.error("[ConvertTrialToBusinessJob] Business creation failed: #{e.message}")
+      Sentry.capture_exception(e, extra: {
+        user_id: user_id,
+        trial_id: trial_id,
+        stripe_subscription_id: stripe_subscription_id
+      })
+      raise
+    end
+
   rescue ActiveRecord::RecordNotFound => e
     Rails.logger.error("[ConvertTrialToBusinessJob] Record not found: #{e.message}")
     Sentry.capture_exception(e, extra: {
