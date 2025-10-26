@@ -591,61 +591,119 @@ OPS-03: Test Runbooks on Staging - 5pts
 
 ## 5. Epic-Level Execution Strategy
 
-### E-001: Foundations (Phase 0) — 1 Sprint, 18pts
+### E-001: Foundations (Phase 0) — 1 Sprint, 32pts (Actually Completed)
+
+**⚠️ IMPLEMENTATION NOTE:** Phase 0 used Rails 8.1 defaults (SolidQueue instead of Sidekiq, single database config). This guide reflects actual implementation.
 
 **Objective:** Production-grade Rails skeleton with auth, jobs, security, and component library.
 
-**Recommended Ticket Breakdown (6 tickets):**
+**Actual Ticket Breakdown (12 tickets, 32pts):**
 
 ```
-T0-01: Rails scaffold + essential gems (5pts)
-  - rails new, Postgres UUIDs, Tailwind, Devise, Sidekiq
-  - bin/setup provisions DB, seeds run
+T0-01: Rails scaffold + essential gems (2pts) ✅
+  - rails new Rails 8.1, Postgres UUIDs, Tailwind, Devise
   - RSpec configured with FactoryBot/VCR/WebMock
+  - bin/setup provisions DB, seeds run
   
-T0-02: Magic-link authentication (Devise passwordless) (3pts)
+T0-02: Magic-link authentication (Devise passwordless) (5pts) ✅
   - User model with devise modules
   - Magic link email flow
   - Tests: Auth request spec, factory
 
-T0-03: External API clients + circuit breakers (5pts)
+T0-03: SolidQueue for background jobs (3pts) ✅ **Changed from Sidekiq**
+  - Rails 8.1 built-in SolidQueue (database-backed)
+  - Mission Control Jobs UI at /jobs
+  - config/queue.yml with critical/default/low queues
+  - No Redis needed for jobs (only for Rack::Attack)
+  - Tests: Job specs, queue processing
+
+T0-04: Core domain models (5pts) ✅
+  - User, Trial, Call, Business with UUID PKs
+  - Associations, validations, factories
+  - Tests: Model specs, Bullet clean
+
+T0-05: Circuit breakers (Stoplight) (5pts) ✅
   - VapiClient, TwilioClient, StripeClient with Stoplight
   - Timeout configuration (5s/10s per start.md)
   - Tests: Circuit breaker specs, timeout handling
 
-T0-04: Webhook framework + idempotency (3pts)
+T0-06: Webhook framework + idempotency (5pts) ✅
   - WebhookEvent model with unique (provider, event_id)
   - Base webhook controller pattern
+  - Signature verification for all 3 providers
   - Tests: Idempotency verification
 
-T0-05: Security baseline (Rack::Attack, SecureHeaders, Sentry) (2pts)
-  - Rate limiting, CSP, HSTS
+T0-07: Sentry observability (2pts) ✅ **Lograge removed**
   - Sentry error tracking
-  - Tests: Throttle specs, security header checks
+  - Lograge removed due to Rails 8 compatibility
+  - Tests: Error capture verification
 
-T0-06: Design system (ShadCN tokens + 8 ViewComponents) (5pts) - CRITICAL
+T0-08: RSpec + test infrastructure (3pts) ✅
+  - SimpleCov, parallel tests, VCR
+  - Test helpers, factories
+  - 94%+ coverage
+
+T0-09: Rack::Attack rate limiting (2pts) ✅
+  - Rate limiting, throttles
+  - Tests: Throttle specs
+
+T0-10: GitHub Actions CI (2pts) ✅
+  - CI pipeline with Postgres/Redis
+  - Security scanning (Brakeman, bundler-audit)
+
+T0-11: Deploy to production (Heroku) (3pts) ✅ **Production, not staging**
+  - Heroku deployment with LIVE API keys
+  - Worker dyno disabled for Phase 0
+  - Production database configuration
+
+T0-12: Design system (4 ViewComponents) (3pts) ✅ **4 components, not 8**
   - tokens.css with ShadCN-inspired variables
   - Tailwind config mapping
-  - Primitives: Button, Input, Card, Badge, Dialog, Toast, Checkbox, Select
+  - Primitives: Button, Input, Card, Toast (Badge/Dialog/Checkbox/Select deferred)
   - ViewComponent::Preview for each (visual gallery)
-  - Tests: Component specs, accessibility (axe-core)
+  - Theme switching (light/dark)
+  - Tests: Component specs, accessibility
 ```
+
+**Key Implementation Differences from Original Plan:**
+
+1. **SolidQueue instead of Sidekiq:**
+   - Rails 8.1 includes SolidQueue by default
+   - Database-backed (no Redis for jobs)
+   - Mission Control Jobs UI instead of Sidekiq Web
+   - Simpler operations, no separate job infrastructure
+
+2. **Single Database Configuration:**
+   - Simplified from multi-database setup
+   - SolidQueue/SolidCache/SolidCable use primary database
+   - No separate queue/cache databases
+
+3. **Production Deployment:**
+   - Deployed directly to Heroku production
+   - Using LIVE API keys (not test keys)
+   - No staging environment in Phase 0
+
+4. **4 Components (not 8):**
+   - Button, Input, Card, Toast implemented
+   - Badge, Dialog, Checkbox, Select deferred to Phase 1+
+   - Build components on-demand rather than all upfront
 
 **TDD Workflow:**
 - Week 1, Days 1-2: T0-01 (scaffold, no TDD needed)
 - Week 1, Days 3-4: T0-02, T0-03 (write specs first, VCR cassettes)
 - Week 1, Day 5: T0-04, T0-05 (request specs for security)
-- Week 2, Days 1-3: T0-06 (component specs before implementations)
+- Week 2, Days 1-3: T0-06-T0-12 (component specs before implementations)
 
 **Common Pitfalls:**
 - Skipping ViewComponent::Preview (visual QA critical for frontend)
 - Not testing circuit breaker transitions (open/half-open/closed)
 - Hardcoding secrets instead of ENV vars
 - Missing indexes on webhook_events (provider, event_id)
+- Assuming Sidekiq when SolidQueue is actually used
 
 **Reference Sections:** start.md Phase 0 (T0.01-T0.17), Section 10 (Engineering Principles)
 
-**Estimated Duration:** 1 sprint (2 weeks for mid-level team)
+**Estimated Duration:** 2 weeks (actual completion time for Phase 0)
 
 ---
 

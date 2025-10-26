@@ -8,13 +8,20 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 ## Tech Stack
 
+**⚠️ Phase 0 Implementation Notes:**
+- Using **SolidQueue** (Rails 8.1 built-in) instead of Sidekiq for background jobs
+- **Redis only for Rack::Attack** rate limiting (not for jobs)
+- **Mission Control Jobs** at `/jobs` for monitoring (not Sidekiq Web UI)
+- Deployed to **Heroku production** with LIVE API keys (no staging environment)
+- **4 ViewComponents** (Button, Input, Card, Toast) - Badge/Dialog/Checkbox/Select deferred to Phase 1+
+
 - **Backend:** Ruby on Rails 8.1, PostgreSQL (UUID), SolidQueue/SolidCache
 - **Frontend:** Turbo, Stimulus, Tailwind CSS, ViewComponents
 - **Voice AI:** Vapi.ai (OpenAI + ElevenLabs)
 - **Telephony:** Twilio
 - **Payments:** Stripe
 - **Email:** SendGrid/Resend
-- **Observability:** Sentry, structured logs
+- **Observability:** Sentry (Lograge removed due to Rails 8 compatibility)
 
 ## Project Phases Overview
 
@@ -39,24 +46,24 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 - [x] **R1-E01-T001** - Initialize Rails 8.1 app with PostgreSQL + UUID support (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T001.md)
 - [x] **R1-E01-T002** - Configure Devise + Passwordless gem for magic-link auth (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T002.md)
-- [x] **R1-E01-T003** - Set up SolidQueue for background jobs (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T003.md)
+- [x] **R1-E01-T003** - Set up SolidQueue for background jobs (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T003.md) **Note:** Using SolidQueue instead of planned Sidekiq
 - [x] **R1-E01-T004** - Create base models: User, Trial, Assistant, Call, Business (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T004.md)
 - [x] **R1-E01-T005** - Implement CircuitBreaker wrapper for API clients (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T005.md)
 - [x] **R1-E01-T006** - Build webhook receiver framework with signature verification (5 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T006.md)
-- [x] **R1-E01-T007** - Configure Sentry + Lograge for observability (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T007.md)
+- [x] **R1-E01-T007** - Configure Sentry for observability (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T007.md) **Note:** Lograge removed due to Rails 8 compatibility
 - [x] **R1-E01-T008** - Set up RSpec + FactoryBot + test infrastructure (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T008.md)
 - [x] **R1-E01-T009** - Configure Rack::Attack for rate limiting (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T009.md)
 - [x] **R1-E01-T010** - Set up GitHub Actions CI pipeline (2 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T010.md)
-- [x] **R1-E01-T011** - Deploy to staging (Fly.io/Render/Heroku) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T011.md)
-- [x] **R1-E01-T012** - Create design system foundation (tokens, components) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T012.md)
+- [x] **R1-E01-T011** - Deploy to production (Heroku) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T011.md) **Note:** Deployed to production with LIVE keys, not staging
+- [x] **R1-E01-T012** - Create design system foundation (4 components) (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E01-T012.md) **Note:** 4 components (not 8), deferred rest to Phase 1+
 
 **Exit Criteria:**
 - ✅ Rails app boots locally with Postgres + SolidQueue
 - ✅ Magic-link auth working
-- ✅ SolidQueue processing jobs
+- ✅ SolidQueue processing jobs (Mission Control UI at `/jobs`)
 - ✅ Comprehensive test infrastructure (RSpec + FactoryBot + coverage)
 - ✅ CI pipeline green
-- ✅ Staging deployment successful
+- ✅ Production deployment successful (Heroku with LIVE API keys)
 
 ---
 
