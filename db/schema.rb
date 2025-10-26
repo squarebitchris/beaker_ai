@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_25_232129) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_26_030348) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
 
@@ -72,6 +73,34 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_25_232129) do
     t.index ["vapi_call_id"], name: "index_calls_on_vapi_call_id", unique: true, where: "(vapi_call_id IS NOT NULL)"
   end
 
+  create_table "email_subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "consent_ip"
+    t.text "consent_user_agent"
+    t.datetime "created_at", null: false
+    t.citext "email", null: false
+    t.boolean "marketing_consent", default: false, null: false
+    t.string "source", default: "trial_signup", null: false
+    t.datetime "subscribed_at", precision: nil, null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id"
+    t.index ["email"], name: "index_email_subscriptions_on_email", unique: true
+    t.index ["source"], name: "index_email_subscriptions_on_source"
+    t.index ["subscribed_at"], name: "index_email_subscriptions_on_subscribed_at"
+    t.index ["user_id"], name: "index_email_subscriptions_on_user_id"
+  end
+
+  create_table "scenario_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.text "notes"
+    t.jsonb "prompt_pack", default: {}, null: false
+    t.datetime "updated_at", null: false
+    t.integer "version", null: false
+    t.index ["key", "active"], name: "idx_unique_active_scenario_template", unique: true, where: "(active = true)"
+    t.index ["key"], name: "index_scenario_templates_on_key"
+  end
+
   create_table "trials", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "assistant_config", default: {}
     t.string "business_name", null: false
@@ -81,12 +110,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_25_232129) do
     t.datetime "expires_at", precision: nil, null: false
     t.string "industry", null: false
     t.string "phone_e164", null: false
+    t.datetime "ready_at", precision: nil
     t.string "scenario", null: false
+    t.uuid "scenario_template_id"
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.string "vapi_assistant_id"
     t.index ["expires_at"], name: "index_trials_on_expires_at"
+    t.index ["ready_at"], name: "index_trials_on_ready_at"
+    t.index ["scenario_template_id"], name: "index_trials_on_scenario_template_id"
     t.index ["status"], name: "index_trials_on_status"
     t.index ["user_id", "created_at"], name: "index_trials_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_trials_on_user_id"
@@ -128,5 +161,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_25_232129) do
 
   add_foreign_key "business_ownerships", "businesses"
   add_foreign_key "business_ownerships", "users"
+  add_foreign_key "email_subscriptions", "users"
+  add_foreign_key "trials", "scenario_templates"
   add_foreign_key "trials", "users"
 end

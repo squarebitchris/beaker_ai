@@ -28,4 +28,3 @@ class PrimitivesPreview < ViewComponent::Preview
 
   layout "component_preview"
 end
-

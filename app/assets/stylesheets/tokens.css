@@ -85,11 +85,12 @@
 /* Base styles */
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: var(--font-sans);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
@@ -97,6 +98,14 @@
 
 /* Utility classes for semantic colors */
 @layer utilities {
+  .bg-background {
+    background-color: hsl(var(--background));
+  }
+  
+  .text-foreground {
+    color: hsl(var(--foreground));
+  }
+  
   .bg-primary {
     background-color: hsl(var(--primary));
   }

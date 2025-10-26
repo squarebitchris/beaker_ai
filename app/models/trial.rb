@@ -1,5 +1,6 @@
 class Trial < ApplicationRecord
   belongs_to :user
+  belongs_to :scenario_template, optional: true
   has_many :calls, as: :callable, dependent: :destroy
 
   enum :status, { pending: "pending", active: "active", converted: "converted", expired: "expired" }
@@ -11,6 +12,7 @@ class Trial < ApplicationRecord
 
   scope :active, -> { where(status: "active").where("expires_at > ?", Time.current) }
   scope :expired_pending, -> { where(status: "pending").where("expires_at < ?", Time.current) }
+  scope :ready, -> { where.not(vapi_assistant_id: nil) }
 
   before_validation :set_expires_at, on: :create
 

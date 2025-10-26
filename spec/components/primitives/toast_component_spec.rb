@@ -9,7 +9,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
       message: "Your changes have been saved",
       auto_dismiss: false
     ))
-    
+
     expect(page).to have_css("div.rounded-radius-md.border")
     expect(page).to have_text("Success")
     expect(page).to have_text("Your changes have been saved")
@@ -21,7 +21,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
       title: "Success",
       auto_dismiss: false
     ))
-    
+
     expect(page).to have_css("svg")
     expect(page).to have_text("Success")
   end
@@ -33,7 +33,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
       message: "Something went wrong",
       auto_dismiss: false
     ))
-    
+
     expect(page).to have_css("div.bg-destructive")
     expect(page).to have_text("Error")
   end
@@ -44,7 +44,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
       title: "Warning",
       auto_dismiss: false
     ))
-    
+
     expect(page).to have_text("Warning")
   end
 
@@ -54,7 +54,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
       dismissible: true,
       auto_dismiss: false
     ))
-    
+
     expect(page).to have_css("button[data-action='click->toast#dismiss']")
   end
 
@@ -64,7 +64,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
       dismissible: false,
       auto_dismiss: false
     ))
-    
+
     expect(page).not_to have_css("button[data-action='click->toast#dismiss']")
   end
 
@@ -73,7 +73,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
       title: "Notification",
       auto_dismiss: true
     ))
-    
+
     expect(page).to have_css("div[data-controller='toast']")
     expect(page).to have_css("div[data-toast-auto-dismiss-value='true']")
   end
@@ -82,7 +82,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
     render_inline(described_class.new(title: "Title", auto_dismiss: false)) do
       "Custom content"
     end
-    
+
     expect(page).to have_text("Title")
     expect(page).to have_text("Custom content")
   end
@@ -93,8 +93,7 @@ RSpec.describe Primitives::ToastComponent, type: :component do
       class: "custom-class",
       auto_dismiss: false
     ))
-    
+
     expect(page).to have_css("div.custom-class")
   end
 end
-

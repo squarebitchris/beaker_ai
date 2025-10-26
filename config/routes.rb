@@ -16,6 +16,10 @@ Rails.application.routes.draw do
   # Custom health check with detailed status
   get "up" => "health#up", as: :health_check
 
+  # Signup flow
+  get "/signup", to: "signups#new", as: :new_signup
+  post "/signup", to: "signups#create", as: :signups
+
   # Webhook endpoints
   post "/webhooks/stripe", to: "webhooks#create", defaults: { provider: "stripe" }
   post "/webhooks/twilio", to: "webhooks#create", defaults: { provider: "twilio" }
@@ -26,5 +30,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "devise/sessions#new"
+  root "signups#new"
 end

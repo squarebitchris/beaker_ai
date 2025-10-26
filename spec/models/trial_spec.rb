@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe Trial, type: :model do
   describe 'associations' do
     it { should belong_to(:user) }
+    it { should belong_to(:scenario_template).optional }
     it { should have_many(:calls).dependent(:destroy) }
   end
 
@@ -73,6 +74,8 @@ RSpec.describe Trial, type: :model do
     let!(:active_trial) { create(:trial, status: 'active', expires_at: 1.hour.from_now) }
     let!(:expired_trial) { create(:trial, status: 'active', expires_at: 1.hour.ago) }
     let!(:pending_trial) { create(:trial, status: 'pending', expires_at: 1.hour.ago) }
+    let!(:ready_trial) { create(:trial, vapi_assistant_id: 'asst_123') }
+    let!(:not_ready_trial) { create(:trial, vapi_assistant_id: nil) }
 
     it '.active returns only non-expired active trials' do
       expect(Trial.active).to include(active_trial)
@@ -84,6 +87,24 @@ RSpec.describe Trial, type: :model do
       expect(Trial.expired_pending).to include(pending_trial)
       expect(Trial.expired_pending).not_to include(active_trial)
       expect(Trial.expired_pending).not_to include(expired_trial)
+    end
+
+    it '.ready returns only trials with vapi_assistant_id' do
+      expect(Trial.ready).to include(ready_trial)
+      expect(Trial.ready).not_to include(not_ready_trial)
+    end
+  end
+
+  describe 'scenario_template association' do
+    it 'can exist without a scenario template' do
+      trial = create(:trial, scenario_template: nil)
+      expect(trial.scenario_template).to be_nil
+    end
+
+    it 'can be associated with a scenario template' do
+      template = create(:scenario_template)
+      trial = create(:trial, scenario_template: template)
+      expect(trial.scenario_template).to eq(template)
     end
   end
 end

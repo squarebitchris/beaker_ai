@@ -71,7 +71,7 @@ Beaker AI is a Rails application that provides voice-first AI agents for small b
 
 **Epic E-002: Trial Flow**
 
-- [ ] **R1-E02-T001** - Landing page with trial signup form (3 pts)
+- [x] **R1-E02-T001** - Landing page with trial signup form (3 pts) ✅ [Completed](./docs/completed_tickets/R1-E02-T001.md)
 - [ ] **R1-E02-T002** - Magic-link email delivery + UTM capture (3 pts)
 - [ ] **R1-E02-T003** - Trial builder UI (industry, persona, scenario selection) (5 pts)
 - [ ] **R1-E02-T004** - Vapi client: create assistant API integration (4 pts)
