@@ -53,7 +53,7 @@ gem "image_processing", "~> 1.2"
 gem "view_component", ">= 3.19.0"
 
 # Circuit breaker for external API calls
-gem "stoplight", "~> 4.0"
+gem "stoplight", "~> 5.4"
 
 # Rate limiting and API protection
 gem "rack-attack", "~> 6.7"
