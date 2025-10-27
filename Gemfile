@@ -67,8 +67,8 @@ gem "twilio-ruby", "~> 7.0"
 
 # Error monitoring
 gem "stackprof"
-gem "sentry-ruby", "~> 5.18"
-gem "sentry-rails", "~> 5.18"
+gem "sentry-ruby", "~> 6.0"
+gem "sentry-rails", "~> 6.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
