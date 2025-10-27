@@ -24,7 +24,7 @@ gem "jbuilder"
 
 # Authentication
 gem "devise", "~> 4.9"
-gem "devise-passwordless", "~> 0.2"
+gem "devise-passwordless", "~> 1.1"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
