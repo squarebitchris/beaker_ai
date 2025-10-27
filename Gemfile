@@ -34,7 +34,7 @@ gem "solid_cache"
 gem "solid_cable"
 
 # Background job processing with Sidekiq
-gem "sidekiq", "~> 7.2"
+gem "sidekiq", "~> 8.0"
 gem "sidekiq-cron", "~> 1.12"
 
 # Reduces boot times through caching; required in config/boot.rb
