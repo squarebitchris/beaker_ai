@@ -62,7 +62,7 @@ gem "rack-attack", "~> 6.7"
 gem "httpx", "~> 1.6"
 
 # API SDKs for webhook verification
-gem "stripe", "~> 12.0"
+gem "stripe", "~> 17.0"
 gem "twilio-ruby", "~> 7.0"
 
 # Error monitoring
