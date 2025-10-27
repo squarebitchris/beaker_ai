@@ -413,12 +413,12 @@ GEM
       concurrent-ruby (~> 1.0, >= 1.0.2)
     shoulda-matchers (6.5.0)
       activesupport (>= 5.2.0)
-    sidekiq (7.3.9)
-      base64
-      connection_pool (>= 2.3.0)
-      logger
-      rack (>= 2.2.4)
-      redis-client (>= 0.22.2)
+    sidekiq (8.0.8)
+      connection_pool (>= 2.5.0)
+      json (>= 2.9.0)
+      logger (>= 1.6.2)
+      rack (>= 3.1.0)
+      redis-client (>= 0.23.2)
     sidekiq-cron (1.12.0)
       fugit (~> 1.8)
       globalid (>= 1.0.1)
@@ -549,7 +549,7 @@ DEPENDENCIES
   sentry-rails (~> 5.18)
   sentry-ruby (~> 5.18)
   shoulda-matchers
-  sidekiq (~> 7.2)
+  sidekiq (~> 8.0)
   sidekiq-cron (~> 1.12)
   simplecov
   simplecov-console
