@@ -455,7 +455,7 @@ GEM
     stoplight (4.1.1)
       redlock (~> 1.0)
     stringio (3.1.7)
-    stripe (12.6.0)
+    stripe (17.0.1)
     terminal-table (4.0.0)
       unicode-display_width (>= 1.1.1, < 4)
     thor (1.4.0)
@@ -558,7 +558,7 @@ DEPENDENCIES
   stackprof
   stimulus-rails
   stoplight (~> 4.0)
-  stripe (~> 12.0)
+  stripe (~> 17.0)
   thruster
   turbo-rails
   twilio-ruby (~> 7.0)
